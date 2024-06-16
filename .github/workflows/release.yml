@@ -24,7 +24,6 @@ jobs:
       - run: bun install
       - name: Create Release
         id: release
-        uses: changesets/action@v1
         with:
           publish: bun run release
         env:
