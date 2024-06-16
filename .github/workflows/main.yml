@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      # ...
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+            bun-version: 1.1.13
+
+      # run any `bun` or `bunx` command
+      - run: bun install
+      - run: bun bundle
