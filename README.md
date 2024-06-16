@@ -1,12 +1,9 @@
-ReactForQuill
+ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
+[![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
----
-
 A [Quill] component for [React].
-It is based on bun and react@17 
-
----
+It is based on bun, quill@2 and react@18 
 
 [quill]: https://quilljs.com
 [react]: https://facebook.github.io/react/
