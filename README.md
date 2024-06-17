@@ -1,4 +1,5 @@
 ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
+[![release date](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
 [![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
@@ -9,26 +10,50 @@ It is based on bun, quill@2 and react@18
 [react]: https://facebook.github.io/react/
 
 - [Quick Start](#quick-start)
+  - [Prepare Assets](#prepare-assets)
+  - [Basic Usage](#basic-usage)
 - [License](#license)
 
 ## Quick Start
 
 Make sure you have `react` and `react-dom`
 
+npm:
 ```sh
 npm install react-for-quill --save
 ```
 
-Embed your theme's source of quill which u want use. Docs [quill-theme](https://quilljs.com/docs/customization/themes#themes)
-
+cdn:
 ```html
-<!-- At root index.html -->
- <!-- snow theme -->
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
- <!-- bubble theme -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.bubble.css" />
+<head>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/index.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+</head>
+<body>
+  <div id='root'></div>
+</body>
 ```
 
+### Prepare Assets
+Embed your theme's source of quill which u want use.
+Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#themes)
+
+Choose your theme what you want `snow` or `bubble`, embed style to root html.
+
+```html
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+```
+or
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.bubble.css" />
+```
+
+### Basic Usage
+
+Implement your code
 ```jsx
 import React, { useState } from 'react';
 import ReactQuill from 'react-for-quill';
@@ -43,7 +68,7 @@ function MyComponent() {
     <>
       <ReactForQuill
         style={{ width: 500, height: 500 }}
-        theme='snow'
+        theme='snow' // or bubble
         value={value}
         onChange={onChange}
       />
@@ -55,7 +80,7 @@ function MyComponent() {
 ## License
 
 The MIT License (MIT)
-Copyright (c) 20234 Duc-Developer
+Copyright (c) 2024 Duc-Developer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

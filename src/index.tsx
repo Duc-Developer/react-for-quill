@@ -2,16 +2,12 @@ import { IReactForQuill } from '@src/Models/index.model';
 import Quill, { QuillOptions, Parchment } from 'quill';
 import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import './index.css';
-import { Delta, EmitterSource, Op } from 'quill/core';
+import { Delta, EmitterSource } from 'quill/core';
 
-function isOp(obj: any): obj is Op {
-  return 'insert' in obj || 'delete' in obj || 'retain' in obj || 'attributes' in obj;
-}
 const ReactForQuill = (props: IReactForQuill, ref: any) => {
   const { readOnly, value, className, style, theme, placeholder, options, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
   const quillRef = useRef<Quill | null>(ref);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const valueRef = useRef(value);
   const onTextChangeRef = useRef(onChange);
   const onQuillEventChangeRef = useRef(onQuillEventChange);
   const onDoubleClickRef = useRef(onDoubleClick);
@@ -36,19 +32,31 @@ const ReactForQuill = (props: IReactForQuill, ref: any) => {
   }, [quillRef.current, readOnly]);
 
   useEffect(() => {
-    // if (valueRef.current === value || !quillRef.current) return;
-    // let newValue = value;
-    // let cursorIndex = 0;
-    // if (!newValue) newValue = '';
-    // if (typeof newValue === 'string') {
-    //     cursorIndex = newValue.length;
-    //     newValue = quillRef.current.clipboard.convert({ html: newValue });
-    // }
-    // if (!(newValue instanceof Delta) || !newValue.ops.every(isOp)) return;
-    // if(typeof newValue.length === 'function')  cursorIndex =  newValue.length();
-    // valueRef.current = newValue;
-    // quillRef.current.setContents(newValue, 'silent');
-    // quillRef.current.setSelection(cursorIndex, 'silent');
+    if (!quillRef.current) return;
+    let newDelta;
+    const currentDelta = quillRef.current.getContents(0, quillRef.current.getLength() - 1);
+    let cursorIndex = 0;
+    if (typeof value === 'string') {
+      newDelta = quillRef.current.clipboard.convert({ html: value });
+    } else if (value instanceof Delta) {
+      newDelta = value;
+    }
+    if (!newDelta) {
+      console.error('Invalid value type');
+      return;
+    }
+    const diff = currentDelta.diff(newDelta);
+    if (diff.ops.length === 0) return;
+    cursorIndex = newDelta.ops.reduce((acc, item) => {
+      if (typeof item.insert === 'string') {
+        acc += item.insert.length;
+      } else if (item.insert) {
+        acc += 1;
+      }
+      return acc;
+    }, 0);
+    quillRef.current.setContents(newDelta, 'silent');
+    quillRef.current.setSelection(cursorIndex, 'silent');
   }, [quillRef.current, value]);
 
   const handleDoubleClick = (e: MouseEvent) => {

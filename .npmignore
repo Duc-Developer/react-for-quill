@@ -1,4 +1,11 @@
 /demo
 /test
+node_modules/
+src/
+scripts/
+.github/
 .prettierrc.json
 bunfig.toml
+.gitignore
+.prettierrc
+.prettierignore
