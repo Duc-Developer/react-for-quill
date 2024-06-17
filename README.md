@@ -1,5 +1,6 @@
 ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
 [![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
+[![release date]](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)
 ==============================================================================
 
 A [Quill] component for [React].
