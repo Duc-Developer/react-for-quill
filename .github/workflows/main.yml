@@ -22,3 +22,6 @@ jobs:
       # run any `bun` or `bunx` command
       - run: bun install
       - run: bun bundle
+      # Copy quill.snow.css to desired location
+      - run: cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
+      - run: cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css

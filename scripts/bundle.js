@@ -1,8 +1,5 @@
 const fs = require('fs').promises;
 
-const quillSnow = require.resolve('../node_modules/quill/dist/quill.snow.css');
-const quillBubble = require.resolve('../node_modules/quill/dist/quill.bubble.css');
-
 const prependHeader = async (headerPath, bundlePath) => {
     const packageJson = await fs.readFile('package.json', 'utf8');
     const version = JSON.parse(packageJson).version;
@@ -41,11 +38,6 @@ const build = async () => {
         if (!minifyResponses.success) {
             throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
         }
-        // clone quill assets
-        await Promise.all([
-            Bun.write("./dist/quill.snow.css", Bun.file(quillSnow)),
-            Bun.write("./dist/quill.bubble.css", Bun.file(quillBubble))
-        ]);
         console.log('Build succeeded');
     } catch (error) {
         console.error('Build failed:', error);
