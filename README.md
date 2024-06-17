@@ -1,5 +1,5 @@
 ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
-[release](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)
+[![release date](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
 [![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
@@ -18,15 +18,30 @@ It is based on bun, quill@2 and react@18
 
 Make sure you have `react` and `react-dom`
 
+npm:
 ```sh
 npm install react-for-quill --save
+```
+
+cdn:
+```html
+<head>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/index.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+</head>
+<body>
+  <div id='root'></div>
+</body>
 ```
 
 ### Prepare Assets
 Embed your theme's source of quill which u want use.
 Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#themes)
 
-Choose your theme what you want <span style="background-color: #FFA500">snow</span> or <span style="background-color: #FFFF00">bubble</span>, embed style to root html.
+Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
 <link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
