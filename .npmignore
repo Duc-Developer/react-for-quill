@@ -6,3 +6,6 @@ scripts/
 .github/
 .prettierrc.json
 bunfig.toml
+.gitignore
+.prettierrc
+.prettierignore

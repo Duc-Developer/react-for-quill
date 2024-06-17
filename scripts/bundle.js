@@ -16,7 +16,6 @@ const build = async () => {
             naming: '[dir]/[name].esm.[ext]',
             splitting: false,
             loader: { '.jsx': 'jsx', '.css': 'file' },
-            sourcemap: 'external',
             external: ['react', 'react-dom'],
         });
         if (!esmResponses.success) {
@@ -28,7 +27,6 @@ const build = async () => {
             format: 'esm',
             naming: '[dir]/[name].min.[ext]',
             minify: true,
-            sourcemap: 'external',
             external: ['react', 'react-dom']
         });
         if (!minifyResponses.success) {
