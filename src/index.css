@@ -1,2 +1,4 @@
-.rfq-container {
-}
+@import '../node_modules/quill/dist/quill.snow.css';
+@import '../node_modules/quill/dist/quill.bubble.css';
+
+.rfq-container {}
