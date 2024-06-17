@@ -1,6 +1,6 @@
 {
   "name": "react-for-quill",
-  "version": "0.0.2",
+  "version": "1.0.0-beta.1",
   "description": "This is component for quill based on quill@2.0 and bun",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
