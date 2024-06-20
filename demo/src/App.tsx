@@ -12,7 +12,26 @@ function App() {
   };
   return (
     <div style={{ display: 'flex' }}>
-      <ReactForQuill style={{ width: '40vw', height: 'calc(100vh - 60px)' }} theme='snow' value={value} onChange={onChange} />
+      <ReactForQuill
+        style={{ width: '40vw', height: 'calc(100vh - 60px)' }}
+        theme='snow' value={value}
+        onChange={onChange}
+        modules={{
+          mention: {
+            getSuggestions: async (query: string) => {
+              if (!query) return [];
+              const response = await fetch('https://dummyjson.com/products');
+              const data = await response.json();
+              return data.products.filter((item) => {
+                const lowerQuery = query.toLowerCase();
+                return item.title.toLowerCase().includes(lowerQuery);
+              }).map((item) => ({ label: item.title, value: item.id, ...item }));
+            },
+            style: { color: 'red' }
+          }
+        }
+        }
+      />
       <pre
         style={{
           border: '1px solid #ccc',

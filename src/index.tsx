@@ -4,8 +4,17 @@ import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import './index.css';
 import { Delta, EmitterSource } from 'quill/core';
 
+import { CUSTOM_MODULES } from './Modules';
+import customModules from './Modules';
+const { Mention, MentionBlot } = customModules;
+
+Quill.register({
+  [`formats/${CUSTOM_MODULES.MENTION_BLOT}`]: MentionBlot,
+  [`modules/${CUSTOM_MODULES.MENTION}`]: Mention
+}, true);
+
 const ReactForQuill = (props: IReactForQuill, ref: any) => {
-  const { readOnly, value, className, style, theme, placeholder, options, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
+  const { readOnly, value, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
   const quillRef = useRef<Quill | null>(ref);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onTextChangeRef = useRef(onChange);
@@ -80,10 +89,10 @@ const ReactForQuill = (props: IReactForQuill, ref: any) => {
       };
 
       const editorContainer = container.appendChild(editorBox);
-      const quillOptions: QuillOptions = { theme, placeholder, ...options };
+      const { theme, debug, registry, bounds, modules, formats } = props;
+      const quillOptions: QuillOptions = { theme, debug, registry, bounds, modules, formats };
 
       const quill = new Quill(editorContainer, quillOptions);
-
       quill.on(Quill.events.TEXT_CHANGE, (delta: Delta, oldContent: Delta, source: EmitterSource) => {
         const html = quill.getSemanticHTML();
         onTextChangeRef.current?.(html, delta, oldContent, source);
@@ -108,5 +117,7 @@ const ReactForQuill = (props: IReactForQuill, ref: any) => {
   return <div ref={containerRef} className={`rfq-container ${className ?? ''}`} style={style} />;
 };
 
+export { customModules };
+export * from './Modules';
 export * as Models from '@src/Models/index.model';
 export default forwardRef(ReactForQuill);

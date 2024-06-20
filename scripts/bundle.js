@@ -13,6 +13,14 @@ const prependHeader = async (headerPath, bundlePath) => {
     await fs.writeFile(bundlePath, `${headerContent}\n${bundleContent}`);
 };
 
+const appendCssFile = async (cssPath, bundlePath, additionalCss) => {
+    let cssContent = await fs.readFile(cssPath, 'utf8');
+    if(additionalCss) {
+        cssContent = `/** react-for-quill css */\n${additionalCss}\n/** =========End======== */\n\n${cssContent}`;
+    }
+    return fs.writeFile(bundlePath, cssContent, 'utf8');
+};
+
 const build = async () => {
     try {
         const esmResponses = await Bun.build({
@@ -21,7 +29,7 @@ const build = async () => {
             format: 'esm',
             naming: '[dir]/[name].esm.[ext]',
             splitting: false,
-            loader: { '.jsx': 'jsx', '.css': 'file' },
+            loader: { '.jsx': 'jsx' },
             external: ['react', 'react-dom'],
         });
         if (!esmResponses.success) {
@@ -32,12 +40,19 @@ const build = async () => {
             outdir: './dist',
             format: 'esm',
             naming: '[dir]/[name].min.[ext]',
+            loader: { '.jsx': 'jsx' },
             minify: true,
             external: ['react', 'react-dom']
         });
         if (!minifyResponses.success) {
             throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
         }
+        console.log('Appending styles...');
+        const mainCss =  await fs.readFile('./src/index.css', 'utf8');
+        await Promise.all([
+            appendCssFile('./node_modules/quill/dist/quill.snow.css', './dist/quill.snow.css', mainCss),
+            appendCssFile('./node_modules/quill/dist/quill.bubble.css', './dist/quill.bubble.css', mainCss),
+        ]);
         console.log('Build succeeded');
     } catch (error) {
         console.error('Build failed:', error);

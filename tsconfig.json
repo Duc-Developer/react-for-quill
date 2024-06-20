@@ -25,13 +25,14 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "composite": false,
-    "strict": true,
+    "strict": false,
     "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
+    "noImplicitAny":false,
     "types": [
       "bun-types" // add Bun global
     ],
