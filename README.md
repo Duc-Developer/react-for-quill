@@ -44,11 +44,11 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.1/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.1/dist/quill.bubble.css" />
 ```
 
 ### Basic Usage
