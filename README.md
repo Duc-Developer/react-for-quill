@@ -23,9 +23,9 @@ cdn:
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.1/dist/index.min.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.1/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
   <div id='root'></div>
