@@ -3,6 +3,9 @@ ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https:/
 [![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
+![react-for-quill-logo](/assets/logo.png)
+
+
 A [Quill] component for [React].
 It is based on bun, quill v2
 
@@ -18,7 +21,7 @@ It is based on bun, quill v2
 
 Make sure you have `react` and `react-dom`
 
-cdn:
+With CDN:
 ```html
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -32,7 +35,9 @@ cdn:
 </body>
 ```
 
-npm:
+---
+
+With NPM:
 ```sh
 npm install react-for-quill --save
 ```
@@ -50,6 +55,8 @@ or
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.1/dist/quill.bubble.css" />
 ```
+
+---
 
 ### Basic Usage
 
