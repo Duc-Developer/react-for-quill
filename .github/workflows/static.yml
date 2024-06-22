@@ -2,7 +2,7 @@ name: Deploy static demo content to Pages
 
 on:
   push:
-    branches: ["demo-page"]
+    branches: ["develop"]
 
   workflow_dispatch:
 
