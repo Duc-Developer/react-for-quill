@@ -3,11 +3,16 @@ ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https:/
 [![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
+![react-for-quill-logo](/assets/logo.png)
+
+
 A [Quill] component for [React].
 It is based on bun, quill v2
+See [live demo]
 
 [quill]: https://quilljs.com
 [react]: https://facebook.github.io/react/
+[live demo]: https://duc-developer.github.io/react-for-quill
 
 - [Quick Start](#quick-start)
   - [Prepare Assets](#prepare-assets)
@@ -18,21 +23,23 @@ It is based on bun, quill v2
 
 Make sure you have `react` and `react-dom`
 
-cdn:
+With CDN:
 ```html
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/index.min.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
   <div id='root'></div>
 </body>
 ```
 
-npm:
+---
+
+With NPM:
 ```sh
 npm install react-for-quill --save
 ```
@@ -44,12 +51,14 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@0.0.2/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.bubble.css" />
 ```
+
+---
 
 ### Basic Usage
 
