@@ -23,10 +23,12 @@ jobs:
       - run: bun install
       - run: bun bundle
       - name: Assets cloning...
-      - run: cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
-      - run: cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
+        run: |
+          cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
+          cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
       - name: Building demo source...
-        run: cd demo && bun install && bun run build
+        run: |
+          cd demo && bun install && bun run build
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Building with jekyll...
