@@ -39,8 +39,7 @@ const build = async () => {
             naming: '[dir]/[name].esm.[ext]',
             splitting: false,
             loader: { '.jsx': 'jsx' },
-            external: ['react', 'react-dom'],
-            sourcemap: 'external',
+            external: ['react', 'react-dom']
         });
         if (!esmResponses.success) {
             throw new AggregateError(esmResponses.logs, 'Bundle .esm failed');
@@ -59,7 +58,6 @@ const build = async () => {
         //     loader: { '.jsx': 'jsx' },
         //     minify: true,
         //     external: ['react', 'react-dom'],
-        //     sourcemap: 'external'
         // });
         // if (!minifyResponses.success) {
         //     throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
