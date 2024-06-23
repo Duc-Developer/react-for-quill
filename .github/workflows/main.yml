@@ -44,6 +44,7 @@ jobs:
   deploy_demo:
     environment:
       name: github-pages
+      if: github.ref == 'refs/heads/main'
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
