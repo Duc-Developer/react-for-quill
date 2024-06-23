@@ -7,7 +7,9 @@ ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https:/
 
 
 A [Quill] component for [React].
-It is based on bun, quill v2
+
+It is based on bun & quill v2
+
 See [live demo]
 
 [quill]: https://quilljs.com
@@ -28,9 +30,9 @@ With CDN:
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.2/dist/index.esm.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.snow.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.2/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
   <div id='root'></div>
@@ -51,11 +53,11 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.2/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.0-beta.2/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.2/dist/quill.bubble.css" />
 ```
 
 ---
