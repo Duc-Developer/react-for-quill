@@ -46,7 +46,7 @@ const build = async () => {
             throw new AggregateError(esmResponses.logs, 'Bundle .esm failed');
         }
 
-        if (mode) {
+        if (mode === 'production') {
             console.log('Bun Content fixing...');
             await fixBundleFromBun('./dist/index.esm.js');
         }
