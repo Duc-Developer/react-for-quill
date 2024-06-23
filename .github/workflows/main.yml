@@ -6,9 +6,9 @@ on:
       - develop
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   id-token: write
+  pages: write
 
 jobs:
   build:
