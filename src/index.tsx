@@ -1,6 +1,6 @@
 import { IReactForQuill, RFQValue } from '@src/Models/index.model';
 import Quill, { QuillOptions, Parchment } from 'quill';
-import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Delta, EmitterSource } from 'quill/core';
 
 import { CUSTOM_MODULES } from './Modules';
@@ -19,6 +19,7 @@ const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill
   const onTextChangeRef = useRef(onChange);
   const onQuillEventChangeRef = useRef(onQuillEventChange);
   const onDoubleClickRef = useRef(onDoubleClick);
+  const [loading, setLoading] = useState(true);
 
   const onKeyUpRef = useRef(onKeyUp);
   const onBlurRef = useRef(onBlur);
@@ -37,10 +38,10 @@ const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill
 
   useEffect(() => {
     quillRef.current?.enable(!readOnly);
-  }, [quillRef.current, readOnly]);
+  }, [readOnly]);
 
   const initValue =  (value: RFQValue, quill?: Quill) => {
-    if (!quill) return;
+    if (!quill || loading) return;
     let newDelta;
     const currentDelta = quill.getContents(0, quill.getLength() - 1);
     let cursorIndex = 0;
@@ -68,7 +69,7 @@ const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill
   };
   useEffect(() => {
     initValue(value, quillRef.current);
-  }, [quillRef.current, value]);
+  }, [loading, value]);
 
   const handleDoubleClick = (e: MouseEvent) => {
     const node = e?.target;
@@ -108,8 +109,8 @@ const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill
       quill.root.addEventListener('dblclick', handleDoubleClick);
       quill.root.addEventListener('blur', (e) => onBlurRef.current?.(e));
 
-      initValue(value, quill);
       quillRef.current = quill;
+      setLoading(false);
     }
     return () => {
       quillRef.current = null;

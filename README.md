@@ -1,7 +1,7 @@
 ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Duc-Developer/react-for-quill/release.yml)](https://github.com/Duc-Developer/react-for-quill/actions/workflows/release.yml)
 [![release](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
-[![NPM Downloads](https://img.shields.io/npm/dm/react-for-quill)](http://www.npmtrends.com/react-for-quill)
+[![NPM Downloads](https://img.shields.io/npm/d18m/react-for-quill)](http://www.npmtrends.com/react-for-quill)
 ==============================================================================
 
 ![react-for-quill-logo](/assets/logo.png)
