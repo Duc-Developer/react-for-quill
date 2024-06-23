@@ -7,7 +7,9 @@ ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https:/
 
 
 A [Quill] component for [React].
-It is based on bun, quill v2
+
+It is based on bun & quill v2
+
 See [live demo]
 
 [quill]: https://quilljs.com
