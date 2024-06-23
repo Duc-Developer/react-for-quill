@@ -27,6 +27,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   build_demo:
+    needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: Building demo source...
@@ -41,12 +42,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
   deploy_demo:
-    needs: build_demo
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: build_demo
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
