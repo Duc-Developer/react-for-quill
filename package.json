@@ -1,6 +1,6 @@
 {
   "name": "react-for-quill",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This is component for quill based on quill@2.0 and bun",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
@@ -18,7 +18,7 @@
     "bundle:declaration": "dts-bundle-generator --config dts-config.json"
   },
   "engines": {
-    "bun": "^1.1"
+    "bun": ">= 1.x.x"
   },
   "keywords": [
     "react",
