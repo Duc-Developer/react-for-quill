@@ -1,7 +1,6 @@
 import { IReactForQuill } from '@src/Models/index.model';
 import Quill, { QuillOptions, Parchment } from 'quill';
 import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
-import './index.css';
 import { Delta, EmitterSource } from 'quill/core';
 
 import { CUSTOM_MODULES } from './Modules';
