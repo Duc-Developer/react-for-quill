@@ -1,6 +1,8 @@
-ReactForQuill [![npm](https://img.shields.io/npm/v/react-for-quill.svg)](https://www.npmjs.com/package/react-for-quill)
-[![release date](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
-[![npm downloads](https://img.shields.io/npm/dt/react-for-quill.svg?maxAge=2592000)](http://www.npmtrends.com/react-for-quill)
+[![NPM Version](https://img.shields.io/npm/v/react-for-quill?labelColor=%23C12127)](https://www.npmjs.com/package/react-for-quill)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Duc-Developer/react-for-quill/release.yml)](https://github.com/Duc-Developer/react-for-quill/actions/workflows/release.yml)
+[![release](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
+[![NPM Downloads](https://img.shields.io/npm/d18m/react-for-quill)](http://www.npmtrends.com/react-for-quill)
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed/Duc-Developer/react-for-quill)](https://github.com/Duc-Developer/react-for-quill/pulls)
 ==============================================================================
 
 ![react-for-quill-logo](/assets/logo.png)
@@ -30,9 +32,9 @@ With CDN:
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.3/dist/index.esm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/index.esm.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.3/dist/quill.snow.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
   <div id='root'></div>
@@ -53,11 +55,11 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.3/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.3/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.bubble.css" />
 ```
 
 ---
