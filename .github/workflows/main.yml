@@ -29,9 +29,13 @@ jobs:
         run: |
           cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
           cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
+        env:
+          MODE: 'production'
   clone_demo:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    env:
+      MODE: 'production'
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
@@ -54,6 +58,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+      MODE: 'production'
     runs-on: ubuntu-latest
     needs: clone_demo
     steps:
