@@ -16,7 +16,9 @@
       ]
     },
     "lib": [
-      "dom", "dom.iterable", "esnext"
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
     "module": "esnext",
     "target": "esnext",
@@ -32,11 +34,15 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "noImplicitAny":false,
+    "noImplicitAny": false,
     "types": [
-      "bun-types" // add Bun global
+      "bun-types",
+      "@testing-library/jest-dom"
     ],
     "declaration": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

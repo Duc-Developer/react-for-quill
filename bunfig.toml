@@ -1,3 +1,4 @@
 [test]
 # always enable coverage
 coverage = true
+preload = "./test/setup.ts"
