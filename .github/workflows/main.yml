@@ -29,6 +29,8 @@ jobs:
         run: |
           cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
           cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
+        env:
+          MODE: 'production'
   clone_demo:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
