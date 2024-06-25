@@ -58,7 +58,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-      MODE: 'production'
     runs-on: ubuntu-latest
     needs: clone_demo
     steps:
