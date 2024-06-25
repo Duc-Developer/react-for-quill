@@ -7,13 +7,11 @@ function htmlAttachment(): Plugin {
   return {
     name: 'attachment-cdn-link',
     transformIndexHtml(html) {
-      const isProduction = process.env.NODE_ENV === 'production';
+      const isProduction = process.env.MODE === 'production';
       const localPath = '/react-for-quill/node_modules/react-for-quill/dist/quill.snow.css';
       const prodHref = 'https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css';
-      const content = html.replace(
-        `${BASE_URL}__RFQ_SNOW_STYLE_LINK_ENV__`,
-        isProduction ? prodHref : localPath
-      );
+      const regex = /(<link id="react-for-quill-snow-style" href=")[^"]+(" rel="stylesheet" \/>)/;
+      const content = html.replace(regex, `$1${isProduction ? prodHref : localPath}$2`);
       return content;
     },
   };
@@ -50,6 +48,7 @@ export default defineConfig(() => {
     },
     resolve: {
       alias: {}
-    }
+    },
+    envDir: './env',
   }
 })
