@@ -177,3 +177,4 @@ dist
 /dist
 /src/Test
 .husky
+/demo/.env
