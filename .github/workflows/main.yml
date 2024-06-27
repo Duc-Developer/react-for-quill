@@ -25,6 +25,7 @@ jobs:
       # run any `bun` or `bunx` command
       - run: bun install
       - run: bun bundle
+      - run: bun run bundle:declaration
       - name: Assets cloning...
         run: |
           cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
