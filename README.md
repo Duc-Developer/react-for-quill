@@ -2,7 +2,7 @@
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Duc-Developer/react-for-quill/release.yml)](https://github.com/Duc-Developer/react-for-quill/actions/workflows/release.yml)
 [![release](https://img.shields.io/github/release-date/Duc-Developer/react-for-quill?display_date=published_at)](https://github.com/Duc-Developer/react-for-quill/releases)
 [![NPM Downloads](https://img.shields.io/npm/d18m/react-for-quill)](http://www.npmtrends.com/react-for-quill)
-[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed/Duc-Developer/react-for-quill)](https://github.com/Duc-Developer/react-for-quill/pulls)
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/Duc-Developer/react-for-quill)](https://github.com/Duc-Developer/react-for-quill/issues)
 ==============================================================================
 
 ![react-for-quill-logo](/assets/logo.png)
@@ -12,16 +12,17 @@ A [Quill] component for [React].
 
 It is based on bun & quill v2
 
-See [live demo]
+See [live demo] or [code pen]
 
 [quill]: https://quilljs.com
 [react]: https://facebook.github.io/react/
 [live demo]: https://duc-developer.github.io/react-for-quill
+[code pen]: https://codepen.io/Duc-Developer/pen/LYovqVL
 
 - [Quick Start](#quick-start)
   - [Prepare Assets](#prepare-assets)
   - [Basic Usage](#basic-usage)
-- [License](#license)
+- [Contributing](#contributing)
 
 ## Quick Start
 
@@ -32,9 +33,9 @@ With CDN:
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/index.esm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/index.esm.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.snow.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
   <div id='root'></div>
@@ -90,25 +91,9 @@ function MyComponent() {
 }
 ```
 
-## License
+## Contributing
 
-The MIT License (MIT)
-Copyright (c) 2024 Duc-Developer
+Bug reports and pull requests are welcome on GitHub at https://github.com/Duc-Developer/react-for-quill. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](/CODE_OF_CONDUCT.md) code of conduct.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+If you wish to contribute, see [CONTRIBUTING](/CONTRIBUTING.md) for development instructions and check out our pinned
+[roadmap issue](https://github.com/Duc-Developer/react-for-quill/issues) for a list of tasks to get started.

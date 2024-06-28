@@ -13,7 +13,7 @@
     "check": "prettier --check 'src/**/*'",
     "format": "prettier --write 'src/**/*'",
     "release": "bun bundle && npm publish",
-    "bundle": "rm -rf dist/ && bun run scripts/bundle.js && bun run bundle:declaration",
+    "bundle": "rm -rf dist/ && bun run scripts/bundle.js",
     "bundle:declaration": "dts-bundle-generator --config dts-config.json"
   },
   "engines": {
