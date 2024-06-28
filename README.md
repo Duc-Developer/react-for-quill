@@ -33,7 +33,7 @@ With CDN:
 <head>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/index.esm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/index.min.js"></script>
 
   <link href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css" rel="stylesheet" />
 </head>

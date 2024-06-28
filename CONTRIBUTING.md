@@ -136,7 +136,7 @@ Once you have Bun installed, follow these steps to set up the project:
 
 ```sh
 bun install
-bun bundle --watch
+bun bundle --watch --demo # --demo help u visualize package on my demo app (./demo)
 bun link
 ```
 

@@ -12,7 +12,7 @@ Quill.register({
   [`modules/${CUSTOM_MODULES.MENTION}`]: Mention
 }, true);
 
-const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill>) => {
+const ReactForQuill = forwardRef((props: IReactForQuill, ref:  React.MutableRefObject<Quill>) => {
   const { readOnly, value, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
   const quillRef = useRef<Quill | null>(ref?.current ?? null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -119,9 +119,9 @@ const ReactForQuill = (props: IReactForQuill, ref:  React.MutableRefObject<Quill
   }, []);
 
   return <div ref={containerRef} className={`rfq-container ${className ?? ''}`} style={style} />;
-};
+});
 
 export { customModules };
 export * from './Modules';
 export * as Models from '@src/Models/index.model';
-export default forwardRef(ReactForQuill);
+export default ReactForQuill;
