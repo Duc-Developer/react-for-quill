@@ -1,6 +1,9 @@
 import { promises as fsASync, watch } from 'fs';
 import CleanCSS from 'clean-css';
+const utilities = require('./utilities');
 const { exec } = require('child_process');
+
+const { visualizer } = utilities;
 
 const prepareHeader = async (headerPath) => {
     const packageJson = await fsASync.readFile('package.json', 'utf8');
@@ -46,24 +49,25 @@ const build = async (watching) => {
             throw new AggregateError(esmResponses.logs, 'Bundle .esm failed');
         }
 
-        const minifyResponses = await Bun.build({
-            entrypoints: ['src/index.tsx'],
-            outdir: './dist',
-            format: 'esm',
-            naming: '[dir]/[name].min.[ext]',
-            loader: { '.jsx': 'jsx' },
-            minify: true,
-            external: ['react', 'react-dom'],
-        });
-        if (!minifyResponses.success) {
-            throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
-        }
+        // minify is not need at this time
+        // const minifyResponses = await Bun.build({
+        //     entrypoints: ['src/index.tsx'],
+        //     outdir: './dist',
+        //     format: 'esm',
+        //     naming: '[dir]/[name].min.[ext]',
+        //     loader: { '.jsx': 'jsx' },
+        //     minify: true,
+        //     external: ['react', 'react-dom'],
+        // });
+        // if (!minifyResponses.success) {
+        //     throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
+        // }
 
         if (mode === 'production') {
             console.log('Bun Content fixing...');
             await Promise.all([
                 fixBundleFromBun('./dist/index.esm.js'),
-                fixBundleFromBun('./dist/index.min.js')
+                // fixBundleFromBun('./dist/index.min.js')
             ]);
         }
 
@@ -82,6 +86,8 @@ const build = async (watching) => {
             appendCssFile('./node_modules/quill/dist/quill.bubble.css', './dist/quill.bubble.css', minifiedCss),
         ]);
         console.log('🎉🎉🎉 Congratulation. Build succeeded  🎉🎉🎉');
+        await visualizer();
+
         const runWithDemo = process.argv.includes('--demo');
         if (watching && runWithDemo) {
             const commands = `
