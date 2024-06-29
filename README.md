@@ -28,22 +28,6 @@ See [live demo] or [code pen]
 
 Make sure you have `react` and `react-dom`
 
-With CDN:
-```html
-<head>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/index.esm.js"></script>
-
-  <link href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css" rel="stylesheet" />
-</head>
-<body>
-  <div id='root'></div>
-</body>
-```
-
----
-
 With NPM:
 ```sh
 npm install react-for-quill --save

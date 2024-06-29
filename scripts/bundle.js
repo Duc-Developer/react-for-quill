@@ -1,5 +1,9 @@
 import { promises as fsASync, watch } from 'fs';
 import CleanCSS from 'clean-css';
+const utilities = require('./utilities');
+const { exec } = require('child_process');
+
+const { visualizer } = utilities;
 
 const prepareHeader = async (headerPath) => {
     const packageJson = await fsASync.readFile('package.json', 'utf8');
@@ -45,11 +49,7 @@ const build = async (watching) => {
             throw new AggregateError(esmResponses.logs, 'Bundle .esm failed');
         }
 
-        if (mode === 'production') {
-            console.log('Bun Content fixing...');
-            await fixBundleFromBun('./dist/index.esm.js');
-        }
-        /** currently have bug from bun, so we can not use minify */
+        // minify is not need at this time
         // const minifyResponses = await Bun.build({
         //     entrypoints: ['src/index.tsx'],
         //     outdir: './dist',
@@ -63,14 +63,21 @@ const build = async (watching) => {
         //     throw new AggregateError(esmResponses.logs, 'Bundle .min failed');
         // }
 
+        if (mode === 'production') {
+            console.log('Bun Content fixing...');
+            await Promise.all([
+                fixBundleFromBun('./dist/index.esm.js'),
+                // fixBundleFromBun('./dist/index.min.js')
+            ]);
+        }
+
         let headerContent = '/** Development */';
-        if(!watching) {
+        if (!watching) {
             console.log('Header attaching...');
             headerContent = await prepareHeader('./scripts/bundleHeader.js');
             await prependHeader(headerContent, './dist/index.esm.js');
-        }        
+        }
 
-        console.log('Style Attaching...');
         const mainCss = await fsASync.readFile('./src/index.css', 'utf8');
         let minifiedCss = new CleanCSS({}).minify(mainCss).styles;
         minifiedCss = `${headerContent}\n${minifiedCss}\n/** =========End======== */\n`;
@@ -78,13 +85,28 @@ const build = async (watching) => {
             appendCssFile('./node_modules/quill/dist/quill.snow.css', './dist/quill.snow.css', minifiedCss),
             appendCssFile('./node_modules/quill/dist/quill.bubble.css', './dist/quill.bubble.css', minifiedCss),
         ]);
-        console.log('Build succeeded');
+        console.log('🎉🎉🎉 Congratulation. Build succeeded  🎉🎉🎉');
+        await visualizer();
+
+        const runWithDemo = process.argv.includes('--demo');
+        if (watching && runWithDemo) {
+            const commands = `
+            bun link &&
+            cd demo &&
+            bun install &&
+            bun run dev
+        `;
+            exec(commands, (error) => {
+                if (error) console.error(`Execution error: ${error}`);
+            });
+            console.log('\u001b]8;;http://localhost:3000/react-for-quill/\u0007\x1b[34mClick to visualize demo app\x1b[0m\u001b]8;;\u0007');
+        }
     } catch (error) {
         console.error('Build failed:', error);
     }
 };
 
-const isWatchMode =process.argv.includes('--watch');
+const isWatchMode = process.argv.includes('--watch');
 build(isWatchMode);
 
 if (isWatchMode) {
