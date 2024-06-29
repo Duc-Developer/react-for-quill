@@ -5,11 +5,14 @@
       "@src/*": [
         "src/*"
       ],
-      "@dist/*": [
-        "dist/*"
+      "@components/*": [
+        "src/Components/*"
       ],
-      "@utils/*": [
-        "Utilities/*"
+      "@models/*": [
+        "src/Models/*"
+      ],
+      "@modules/*": [
+        "src/Modules/*"
       ],
       "@test/*": [
         "test/*"
