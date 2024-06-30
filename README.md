@@ -19,10 +19,11 @@ See [live demo] or [code pen]
 [live demo]: https://duc-developer.github.io/react-for-quill
 [code pen]: https://codepen.io/Duc-Developer/pen/LYovqVL
 
-- [Quick Start](#quick-start)
-  - [Prepare Assets](#prepare-assets)
-  - [Basic Usage](#basic-usage)
-- [Contributing](#contributing)
+- [](#)
+  - [Quick Start](#quick-start)
+    - [Prepare Assets](#prepare-assets)
+    - [Basic Usage](#basic-usage)
+  - [Contributing](#contributing)
 
 ## Quick Start
 
@@ -57,8 +58,10 @@ import React, { useState } from 'react';
 import ReactQuill from 'react-for-quill';
 import 'react-quill/dist/quill.snow.css';
 
+const defaultValue = '<p>Hello World!<p>';
 function MyComponent() {
- const [value, setValue] = useState<RFQValue>('');
+  const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
+  const [value, setValue] = useState<RFQValue>(initialValue);
   const onChange = (html: string, delta: Delta, oldContent: Delta, source: EmitterSource) => {
     setValue(html);
   };
@@ -67,7 +70,7 @@ function MyComponent() {
       <ReactForQuill
         style={{ width: 500, height: 500 }}
         theme='snow' // or bubble
-        value={value}
+        defaultValue={initialValue}
         onChange={onChange}
       />
     </>

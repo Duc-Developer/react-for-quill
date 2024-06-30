@@ -1,6 +1,6 @@
 import { CustomModuleKey, MentionModuleOptions } from '../Modules';
 import Quill, { EmitterSource } from 'quill';
-import { Delta, QuillOptions, Module } from 'quill/core';
+import { Delta, QuillOptions } from 'quill/core';
 
 export type RFQValue = string | Delta;
 export type RFQEventChange = (event: keyof typeof Quill.events, ...args: unknown[]) => void;
@@ -9,7 +9,7 @@ export type RFQModules = Record<string, unknown> & Partial<Record<CustomModuleKe
 export interface IReactForQuill extends QuillOptions {
   theme: string;
   readOnly?: boolean;
-  value?: RFQValue;
+  defaultValue?: RFQValue;
   style?: React.CSSProperties;
   onChange?: RFQOnChange;
   onBlur?: (e: FocusEvent) => void;
