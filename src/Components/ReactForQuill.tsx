@@ -12,13 +12,14 @@ Quill.register({
   [`modules/${CUSTOM_MODULES.MENTION}`]: Mention
 }, true);
 
-const ReactForQuill = forwardRef((props: IReactForQuill, ref:  React.MutableRefObject<Quill>) => {
-  const { readOnly, value, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
+const ReactForQuill = forwardRef((props: IReactForQuill, ref: React.MutableRefObject<Quill>) => {
+  const { readOnly, defaultValue, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
   const quillRef = useRef<Quill | null>(ref?.current ?? null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onTextChangeRef = useRef(onChange);
   const onQuillEventChangeRef = useRef(onQuillEventChange);
   const onDoubleClickRef = useRef(onDoubleClick);
+  const defaultValueRef = useRef();
   const [loading, setLoading] = useState(true);
 
   const onKeyUpRef = useRef(onKeyUp);
@@ -40,36 +41,20 @@ const ReactForQuill = forwardRef((props: IReactForQuill, ref:  React.MutableRefO
     quillRef.current?.enable(!readOnly);
   }, [readOnly]);
 
-  const initValue =  (value: RFQValue, quill?: Quill) => {
-    if (!quill || loading) return;
-    let newDelta;
-    const currentDelta = quill.getContents(0, quill.getLength() - 1);
-    let cursorIndex = 0;
-    if (typeof value === 'string') {
-      newDelta = quill.clipboard.convert({ html: value });
-    } else if (value instanceof Delta) {
-      newDelta = value;
-    }
-    if (!newDelta) {
-      console.error('Invalid value type');
+  const initValue = (defaultValue: RFQValue, quill?: Quill) => {
+    if (!quill || loading || defaultValueRef.current === defaultValue) return;
+    if (typeof defaultValue === 'string') {
+      quill.clipboard.dangerouslyPasteHTML(defaultValue, 'api');
       return;
+    } else if (defaultValue instanceof Delta) {
+      const newDelta = defaultValue;
+      quill.setContents(newDelta, 'api');
     }
-    const diff = currentDelta.diff(newDelta);
-    if (diff.ops.length === 0) return;
-    cursorIndex = newDelta.ops.reduce((acc, item) => {
-      if (typeof item.insert === 'string') {
-        acc += item.insert.length;
-      } else if (item.insert) {
-        acc += 1;
-      }
-      return acc;
-    }, 0);
-    quill.setContents(newDelta, 'silent');
-    quill.setSelection(cursorIndex, 'silent');
   };
   useEffect(() => {
-    initValue(value, quillRef.current);
-  }, [loading, value]);
+    if (defaultValue === undefined) return;
+    initValue(defaultValue, quillRef.current);
+  }, [loading, defaultValue]);
 
   const handleDoubleClick = (e: MouseEvent) => {
     const node = e?.target;
