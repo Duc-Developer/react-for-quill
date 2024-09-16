@@ -1,19 +1,30 @@
 import ReactForQuill, { RFQValue, MentionBlot, Mention, Quill } from 'react-for-quill';
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import mentionData from './dummy/mention-data.json';
+import hljs from 'highlight.js';
+import pretty from 'pretty';
+import { Delta } from 'quill/core';
 
-const defaultValue = "<p>Dear <span data-user-id=\"29\" quill-type=\"mention\" contenteditable=\"false\" class=\"mention-blot select-none\" style=\"color: red;\">@Juice</span>​,</p><p></p><p>Welcome to our store! We are thrilled to have you as a new customer and we look forward to serving you.</p><p></p><p>If you have any <u>questions</u> or need <u>assistance</u>, feel free to reach out to us at any time.</p><p></p><p>Thank you for choosing us!</p><p></p><p><strong>Best regards,</strong></p><p><em>David</em></p><p><a href=\"www.google.com\" rel=\"noopener noreferrer\" target=\"_blank\">www.google.com</a></p>";
+const defaultValue = "<p>Dear <span class=\"mention\" data-index=\"99\" data-denotation-char=\"@\" data-id=\"d8890706-2f38-45dd-9513-614edd39ff6a\" data-value=\"Ameline\">﻿<span contenteditable=\"false\">@Ameline</span>﻿</span>,</p>\n<p></p>\n<p>Welcome to our store! We are thrilled to have you as a new customer and we look forward to serving you.</p>\n<p></p>\n<p>If you have any <u>questions</u> or need <u>assistance</u>, feel free to reach out to us at any time.</p>\n<p></p>\n<p>Thank you for choosing us!</p>\n<p></p>\n<p><strong>Best regards,</strong></p>\n<p><em>David</em></p>\n<p><a href=\"https://www.npmjs.com/package/react-for-quill\" rel=\"noopener noreferrer\" target=\"_blank\">react-for-quill</a></p>";
 const defaultValue1 = '<p>Hello world!</p>';
 const defaultValue2 = '<p><strong>bold</strong></p>';
+import xml from 'highlight.js/lib/languages/xml';
 
-Quill.register({ "blots/mention": MentionBlot, "modules/mention": Mention });
+hljs.registerLanguage('xml', xml);
+Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
+
 function App() {
   const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
   const [value, setValue] = useState<RFQValue>(initialValue);
+  const [displayRaw, setDisplayRaw] = useState('');
 
-  const escapeHtml = (html: string) => {
-    return html.replace(/<\/p>/g, '</p>\n');
-  };
+  useEffect(() => {
+    const htmlString = value instanceof Delta ? 'not supported' : value;
+    setDisplayRaw(pretty(htmlString, { ocd: true }));
+    hljs.highlightAll();
+  }, [value]);
+
   const handleRandomDefaultValue = () => {
     switch (initialValue) {
       case defaultValue:
@@ -30,17 +41,9 @@ function App() {
         break;
     }
   };
-  const atValues = [
-    { id: 1, value: "Fredrik Sundqvist sdf asdf asdfads fasdf asdaf asdfdsaf dasfdsfadsfd sfdsfadf adsf d" },
-    { id: 2, value: "Patrik Sjölin" }
-  ];
-  const hashValues = [
-    { id: 3, value: "Fredrik Sundqvist 2" },
-    { id: 4, value: "Patrik Sjölin 2" }
-  ];
   return (
     <div style={{ display: 'flex' }}>
-      <div style={{ width: '40vw', height: 'calc(100vh - 60px)' }}>
+      <div className='editor'>
         <button className='rand-btn' onClick={handleRandomDefaultValue}>random value</button>
         <ReactForQuill
           theme='snow'
@@ -49,26 +52,19 @@ function App() {
           style={{ width: '100%', height: 'calc(100% - 30px)' }}
           modules={{
             mention: {
-              allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
-              denotationChars: ["@", "#"],
-              source: function (searchTerm, renderList, mentionChar) {
-                let values;
-
-                if (mentionChar === "@") {
-                  values = atValues;
-                } else {
-                  values = hashValues;
-                }
-
+              allowedChars: /^[A-Za-z\s]*$/,
+              denotationChars: ["@"],
+              source: function (searchTerm, renderList) {
                 if (searchTerm.length === 0) {
-                  renderList(values, searchTerm);
+                  renderList(mentionData, searchTerm);
                 } else {
                   const matches = [];
-                  for (let i = 0; i < values.length; i++)
-                    if (
-                      ~values[i].value.toLowerCase().indexOf(searchTerm.toLowerCase())
-                    )
-                      matches.push(values[i]);
+                  for (let i = 0; i < mentionData.length; i++) {
+                    const matched = mentionData[i].value.toLowerCase().indexOf(searchTerm.toLowerCase());
+                    if (matched > -1) {
+                      matches.push(mentionData[i]);
+                    }
+                  }
                   renderList(matches, searchTerm);
                 }
               }
@@ -78,16 +74,16 @@ function App() {
         />
       </div>
 
-      <div style={{ marginLeft: 20, marginTop: 30 }}>
-        <textarea
-          style={{
-            display: 'block', width: 'calc(60vw - 20px)',
-            height: 'calc(100vh - 68px)',
-            padding: 10
-          }}
-          value={escapeHtml(value as string)}
-          readOnly={true}
-        />
+      <div style={{ marginLeft: 20, marginTop: 20 }}>
+        <pre className="html">
+          <code className="html" dangerouslySetInnerHTML={{
+            __html: hljs.highlight(
+              displayRaw,
+              { language: 'xml' }
+            ).value
+          }}>
+          </code>
+        </pre>
       </div>
     </div>
   );

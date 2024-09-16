@@ -1,5 +1,7 @@
 import Quill from 'quill';
 import type { ScrollBlot, EmbedBlot } from 'parchment';
+import { CUSTOM_FORMATS } from '@src/constants';
+import DOMPurify from 'dompurify';
 const Embed = Quill.import('blots/embed') as typeof EmbedBlot;
 
 class MentionEvent extends Event {
@@ -29,7 +31,7 @@ function isMentionBlot(data: unknown): data is MentionBlotData {
 }
 
 class MentionBlot extends Embed {
-  static blotName = 'mention';
+  static blotName = CUSTOM_FORMATS.MENTION_BLOT;
   static tagName = 'span';
   static className = 'mention';
 
@@ -51,8 +53,8 @@ class MentionBlot extends Embed {
     }
 
     const denotationChar = document.createElement('span');
-    denotationChar.className = 'ql-mention-denotation-char';
-    denotationChar.innerText = data.denotationChar;
+    denotationChar.className = 'rfq-mention-denotation-char';
+    denotationChar.innerText = DOMPurify.sanitize(data.denotationChar);
     node.appendChild(denotationChar);
 
     if (typeof this.render === 'function') {
@@ -117,7 +119,7 @@ class MentionBlot extends Embed {
   private buildEvent(name: string, e: Event): MentionEvent {
     const event = new MentionEvent(name, {
       bubbles: true,
-      cancelable: true,
+      cancelable: true
     });
     event.value = Object.assign({}, (this.domNode as HTMLElement).dataset);
     event.event = e;
