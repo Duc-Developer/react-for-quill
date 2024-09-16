@@ -41,11 +41,11 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.bubble.css" />
 ```
 
 ---
@@ -56,7 +56,7 @@ Implement your code
 ```jsx
 import React, { useState } from 'react';
 import ReactQuill from 'react-for-quill';
-import 'react-quill/dist/quill.snow.css';
+import 'react-for-quill/dist/quill.snow.css';
 
 const defaultValue = '<p>Hello World!<p>';
 function MyComponent() {

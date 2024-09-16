@@ -91,10 +91,11 @@ const build = async (watching) => {
         const runWithDemo = process.argv.includes('--demo');
         if (watching && runWithDemo) {
             const commands = `
+            export MODE=development &&
             bun link &&
             cd demo &&
             bun install &&
-            bun run dev
+            bun run dev 
         `;
             exec(commands, (error) => {
                 if (error) console.error(`Execution error: ${error}`);
