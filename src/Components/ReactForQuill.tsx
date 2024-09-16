@@ -2,15 +2,11 @@ import { IReactForQuill, RFQValue } from '@models/index.model';
 import Quill, { QuillOptions, Parchment } from 'quill';
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Delta, EmitterSource } from 'quill/core';
+import { MentionBlot } from '@src/Blots';
+import { Mention } from '@src/Modules/Mention';
 
-import { CUSTOM_MODULES } from '@modules/index';
-import customModules from '@modules/index';
-const { Mention, MentionBlot } = customModules;
+Quill.register({ "blots/mention": MentionBlot, "modules/mention": Mention });
 
-Quill.register({
-  [`formats/${CUSTOM_MODULES.MENTION_BLOT}`]: MentionBlot,
-  [`modules/${CUSTOM_MODULES.MENTION}`]: Mention
-}, true);
 
 const ReactForQuill = forwardRef((props: IReactForQuill, ref: React.MutableRefObject<Quill>) => {
   const { readOnly, defaultValue, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
