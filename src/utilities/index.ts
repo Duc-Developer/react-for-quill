@@ -29,11 +29,11 @@ function setInnerContent(
 
 function getMentionCharIndex(
     text: string,
-    mentionDenotationChars: string[],
+    denotationChars: string[],
     isolateChar: boolean,
     allowInlineMentionChar: boolean
 ): { mentionChar: string | null; mentionCharIndex: number } {
-    return mentionDenotationChars.reduce(
+    return denotationChars.reduce(
         (prev, mentionChar) => {
             let mentionCharIndex;
 

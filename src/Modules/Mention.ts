@@ -1,43 +1,48 @@
 import Quill from "quill";
-import {Keys} from "../constants";
+import {Keys} from "@src/constants";
 import {
   attachDataValues,
   getMentionCharIndex,
   hasValidChars,
   hasValidMentionCharIndex,
   setInnerContent,
-} from "../utilities";
+} from "@src/utilities";
 import type { Delta, EmitterSource, Range } from "quill/core";
 
 const Module = Quill.import("core/module");
 
+export interface MentionClasses {
+  dropdownContainer?: string;
+  dropdownList?: string;
+  dropdownItem?: string;
+}
 export interface MentionOption {
   /**
-   * Specifies which characters will cause the mention autocomplete to open
+   * Specifies which characters will trigger dropdown list of mentions
    * @default ["@"]
    */
-  mentionDenotationChars: string[];
+  denotationChars: string[];
 
   /**
-   * Whether to show the used denotation character in the mention item or not
+   * U can choose to show denotation character in the mention item or not
    * @default true
    */
-  showDenotationChar: boolean;
+  showPrefix: boolean;
 
   /**
-   * Allowed characters in search term triggering a search request using regular expressions. Can be a function that takes the denotationChar and returns a regex.
+   * Allowed characters in search term triggering a search request using regular expressions.
    * @default /^[a-zA-Z0-9_]*$/
    */
   allowedChars: RegExp | ((char: string) => RegExp);
 
   /**
-   * Minimum number of characters after the @ symbol triggering a search request
+   * Minimum characters to type before the mention dropdown is shown
    * @default 0
    */
   minChars: number;
 
   /**
-   * Maximum number of characters after the @ symbol triggering a search request
+   * Maximum characters to type before the mention dropdown is shown
    * @default 31
    */
   maxChars: number;
@@ -67,25 +72,28 @@ export interface MentionOption {
   allowInlineMentionChar: boolean;
 
   /**
-   * When set to true, the mentions menu will be rendered above or below the quill container. Otherwise, the mentions menu will track the denotation character(s);
+   * If true, the mentions dropdown will be rendered above or below the quill container. Otherwise, the mentions dropdown will track the denotation character(s);
    * @default false
    */
-  fixMentionsToQuill: boolean;
+  fixedMentionDropdown: boolean;
 
   /**
-   * Options are 'normal' and 'fixed'. When 'fixed', the menu will be appended to the body and use fixed positioning. Use this if the menu is clipped by a parent element that's using `overflow:hidden
+   * Options are 'normal' and 'fixed'. When 'fixed', the dropdown will be appended to the body and use fixed positioning. Use this if the dropdown is clipped by a parent element that's using `overflow:hidden
    * @default "normal"
    */
   positioningStrategy: "normal" | "fixed";
   /**
-   * Options are 'bottom' and 'top'. Determines what the default orientation of the menu will be. Quill-mention will attempt to render the menu either above or below the editor. If 'top' is provided as a value, and there is not enough space above the editor, the menu will be rendered below. Vice versa, if there is not enough space below the editor, and 'bottom' is provided as a value (or no value is provided at all), the menu will be rendered above the editor.
+   * Options are 'bottom' and 'top'. Determines what the default orientation of the dropdown will be. 
+   * It will attempt to render the dropdown either above or below the editor. 
+   * If 'top' is provided as a value, and there is not enough space above the editor, the dropdown will be rendered below. 
+   * Vice versa, if there is not enough space below the editor, and 'bottom' is provided as a value (or no value is provided at all), the dropdown will be rendered above the editor.
    * @default "bottom"
    */
   defaultMenuOrientation: "top" | "bottom";
 
   /**
-   * The name of the Quill Blot to be used for inserted mentions. A default implementation is provided named 'mention', which may be overridden with a custom blot.
-   * @default "mention"
+   * The name of the Quill Blot to be used for inserted mentions.
+   * @default "mentionBlot"
    */
   blotName: string;
 
@@ -93,7 +101,7 @@ export interface MentionOption {
    * A list of data values you wish to be passed from your list data to the html node. (id, value, denotationChar, link, target are included by default).
    * @default ["id", "value", "denotationChar", "link", "target", "disabled"]
    */
-  dataAttributes: string[];
+  nodeAttributes: string[];
 
   /**
    * Link target for mentions with a link
@@ -102,25 +110,13 @@ export interface MentionOption {
   linkTarget: string;
 
   /**
-   * Style class to be used for list items (may be null)
-   * @default "ql-mention-list-item"
+   * Style class to be used for dropdown and children of it (may be null)
+   * @default {dropdownContainer: "ql-mention-list-container", dropdownList: "ql-mention-list", dropdownItem: "ql-mention-list-item"}
    */
-  listItemClass: string;
+  mentionClasses?: MentionClasses;
 
   /**
-   * Style class to be used for the mention list container (may be null)
-   * @default "ql-mention-list-container"
-   */
-  mentionContainerClass: string;
-
-  /**
-   * Style class to be used for the mention list (may be null)
-   * @default "ql-mention-list"
-   */
-  mentionListClass: string;
-
-  /**
-   * Whether or not insert 1 space after mention block in text
+   * default we insert a space after the mention. Set this to false if you don't want that to happen.
    * @default true
    */
   spaceAfterInsert: boolean;
@@ -202,8 +198,8 @@ export interface MentionOption {
 
 export class Mention extends Module<MentionOption> {
   static DEFAULTS: MentionOption = {
-    mentionDenotationChars: ["@"],
-    showDenotationChar: true,
+    denotationChars: ["@"],
+    showPrefix: true,
     allowedChars: /^[a-zA-Z0-9_]*$/,
     minChars: 0,
     maxChars: 31,
@@ -211,11 +207,11 @@ export class Mention extends Module<MentionOption> {
     offsetLeft: 0,
     isolateCharacter: false,
     allowInlineMentionChar: false,
-    fixMentionsToQuill: false,
+    fixedMentionDropdown: false,
     positioningStrategy: "normal",
     defaultMenuOrientation: "bottom",
-    blotName: "mention",
-    dataAttributes: [
+    blotName: "mentionBlot",
+    nodeAttributes: [
       "id",
       "value",
       "denotationChar",
@@ -224,9 +220,11 @@ export class Mention extends Module<MentionOption> {
       "disabled",
     ],
     linkTarget: "_blank",
-    listItemClass: "ql-mention-list-item",
-    mentionContainerClass: "ql-mention-list-container",
-    mentionListClass: "ql-mention-list",
+    mentionClasses: {
+      dropdownContainer: "ql-mention-list-container",
+      dropdownList: "ql-mention-list",
+      dropdownItem: "ql-mention-list-item",
+    },
     spaceAfterInsert: true,
     selectKeys: [Keys.ENTER],
     source: (searchTerm, renderList, mentionChar) => {
@@ -270,10 +268,10 @@ export class Mention extends Module<MentionOption> {
     this.values = [];
     this.suspendMouseEnter = false;
 
-    if (Array.isArray(options?.dataAttributes)) {
-      this.options.dataAttributes = this.options.dataAttributes
-        ? this.options.dataAttributes.concat(options.dataAttributes)
-        : options.dataAttributes;
+    if (Array.isArray(options?.nodeAttributes)) {
+      this.options.nodeAttributes = this.options.nodeAttributes
+        ? this.options.nodeAttributes.concat(options.nodeAttributes)
+        : options.nodeAttributes;
     }
 
     //Bind all option-functions so they have a reasonable context
@@ -288,22 +286,18 @@ export class Mention extends Module<MentionOption> {
 
     //create mention container
     this.mentionContainer = document.createElement("div");
-    this.mentionContainer.className = this.options.mentionContainerClass
-      ? this.options.mentionContainerClass
-      : "";
+    this.mentionContainer.className = this.options?.mentionClasses.dropdownContainer ?? "";
     this.mentionContainer.style.cssText = "display: none; position: absolute;";
     this.mentionContainer.onmousemove = this.onContainerMouseMove.bind(this);
 
-    if (this.options.fixMentionsToQuill) {
+    if (this.options.fixedMentionDropdown) {
       this.mentionContainer.style.width = "auto";
     }
 
     this.mentionList = document.createElement("ul");
     this.mentionList.id = "quill-mention-list";
     quill.root.setAttribute("aria-owns", "quill-mention-list");
-    this.mentionList.className = this.options.mentionListClass
-      ? this.options.mentionListClass
-      : "";
+    this.mentionList.className = this.options?.mentionClasses?.dropdownList ?? "";
     this.mentionContainer.appendChild(this.mentionList);
 
     quill.on("text-change", this.onTextChange.bind(this));
@@ -506,7 +500,7 @@ export class Mention extends Module<MentionOption> {
     }
     const options = { ...this.options, ...overriddenOptions };
 
-    if (!options.showDenotationChar) {
+    if (!options.showPrefix) {
       render.denotationChar = "";
     }
 
@@ -625,9 +619,7 @@ export class Mention extends Module<MentionOption> {
       for (let i = 0; i < data.length; i += 1) {
         const li = document.createElement("li");
         li.id = "quill-mention-item-" + i;
-        li.className = this.options.listItemClass
-          ? this.options.listItemClass
-          : "";
+        li.className = this.options?.mentionClasses?.dropdownItem ?? "";
         if (data[i].disabled) {
           li.className += " disabled";
           li.setAttribute("aria-hidden", "true");
@@ -646,7 +638,7 @@ export class Mention extends Module<MentionOption> {
         }
         li.dataset.denotationChar = mentionChar;
         this.mentionList.appendChild(
-          attachDataValues(li, data[i], this.options.dataAttributes!)
+          attachDataValues(li, data[i], this.options.nodeAttributes!)
         );
       }
       this.itemIndex = initialSelection;
@@ -709,7 +701,7 @@ export class Mention extends Module<MentionOption> {
   }
 
   containerRightIsNotVisible(leftPos: number, containerPos: DOMRect) {
-    if (this.options.fixMentionsToQuill) {
+    if (this.options.fixedMentionDropdown) {
       return false;
     }
 
@@ -753,7 +745,7 @@ export class Mention extends Module<MentionOption> {
     let leftPos = this.options.offsetLeft!;
 
     // handle horizontal positioning
-    if (this.options.fixMentionsToQuill) {
+    if (this.options.fixedMentionDropdown) {
       const rightPos = 0;
       this.mentionContainer.style.right = `${rightPos}px`;
     } else {
@@ -770,7 +762,7 @@ export class Mention extends Module<MentionOption> {
     // handle vertical positioning
     if (this.options.defaultMenuOrientation === "top") {
       // Attempt to align the mention container with the top of the quill editor
-      if (this.options.fixMentionsToQuill) {
+      if (this.options.fixedMentionDropdown) {
         topPos = -1 * (containerHeight + this.options.offsetTop!);
       } else {
         topPos =
@@ -781,7 +773,7 @@ export class Mention extends Module<MentionOption> {
       if (topPos + containerPos.top <= 0) {
         let overMentionCharPos = this.options.offsetTop!;
 
-        if (this.options.fixMentionsToQuill) {
+        if (this.options.fixedMentionDropdown) {
           overMentionCharPos += containerPos.height;
         } else {
           overMentionCharPos += mentionCharPos.bottom;
@@ -791,7 +783,7 @@ export class Mention extends Module<MentionOption> {
       }
     } else {
       // Attempt to align the mention container with the bottom of the quill editor
-      if (this.options.fixMentionsToQuill) {
+      if (this.options.fixedMentionDropdown) {
         topPos += containerPos.height;
       } else {
         topPos += mentionCharPos.bottom;
@@ -801,7 +793,7 @@ export class Mention extends Module<MentionOption> {
       if (this.containerBottomIsNotVisible(topPos, containerPos)) {
         let overMentionCharPos = this.options.offsetTop! * -1;
 
-        if (!this.options.fixMentionsToQuill) {
+        if (!this.options.fixedMentionDropdown) {
           overMentionCharPos += mentionCharPos.top;
         }
 
@@ -809,13 +801,14 @@ export class Mention extends Module<MentionOption> {
       }
     }
 
+    const dropdownContainerClass = this.options?.mentionClasses?.dropdownContainer ?? "";
     if (topPos >= 0) {
-      this.options.mentionContainerClass?.split(" ").forEach((className) => {
+      dropdownContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-bottom`);
         this.mentionContainer.classList.remove(`${className}-top`);
       });
     } else {
-      this.options.mentionContainerClass?.split(" ").forEach((className) => {
+      dropdownContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-top`);
         this.mentionContainer.classList.remove(`${className}-bottom`);
       });
@@ -847,7 +840,7 @@ export class Mention extends Module<MentionOption> {
     };
 
     //Which rectangle should it be relative to
-    const relativeToPos = this.options.fixMentionsToQuill
+    const relativeToPos = this.options.fixedMentionDropdown
       ? containerPos
       : mentionCharPosAbsolute;
 
@@ -855,7 +848,7 @@ export class Mention extends Module<MentionOption> {
     let leftPos = this.options.offsetLeft!;
 
     // handle horizontal positioning
-    if (this.options.fixMentionsToQuill) {
+    if (this.options.fixedMentionDropdown) {
       const rightPos = relativeToPos.right;
       this.mentionContainer.style.right = `${rightPos}px`;
     } else {
@@ -892,6 +885,7 @@ export class Mention extends Module<MentionOption> {
       placement = availableSpaceBottom > availableSpaceTop ? "bottom" : "top";
     }
 
+    const mentionContainerClass = this.options?.mentionClasses?.dropdownContainer ?? "";
     if (placement === "bottom") {
       topPos = relativeToPos.top + relativeToPos.height;
       if (!fitsBottom) {
@@ -900,7 +894,7 @@ export class Mention extends Module<MentionOption> {
         this.mentionContainer.style.height = availableSpaceBottom - 3 + "px";
       }
 
-      this.options.mentionContainerClass?.split(" ").forEach((className) => {
+      mentionContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-bottom`);
         this.mentionContainer.classList.remove(`${className}-top`);
       });
@@ -913,7 +907,7 @@ export class Mention extends Module<MentionOption> {
         topPos = 3;
       }
 
-      this.options.mentionContainerClass?.split(" ").forEach((className) => {
+      mentionContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-top`);
         this.mentionContainer.classList.remove(`${className}-bottom`);
       });
@@ -950,7 +944,7 @@ export class Mention extends Module<MentionOption> {
 
     const { mentionChar, mentionCharIndex } = getMentionCharIndex(
       textBeforeCursor,
-      this.options.mentionDenotationChars!,
+      this.options.denotationChars!,
       this.options.isolateCharacter!,
       this.options.allowInlineMentionChar!
     );

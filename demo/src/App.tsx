@@ -1,10 +1,12 @@
-import ReactForQuill, { RFQValue } from 'react-for-quill';
+import ReactForQuill, { RFQValue, MentionBlot, Mention, Quill } from 'react-for-quill';
 import './App.css';
 import { useState } from 'react';
 
 const defaultValue = "<p>Dear <span data-user-id=\"29\" quill-type=\"mention\" contenteditable=\"false\" class=\"mention-blot select-none\" style=\"color: red;\">@Juice</span>​,</p><p></p><p>Welcome to our store! We are thrilled to have you as a new customer and we look forward to serving you.</p><p></p><p>If you have any <u>questions</u> or need <u>assistance</u>, feel free to reach out to us at any time.</p><p></p><p>Thank you for choosing us!</p><p></p><p><strong>Best regards,</strong></p><p><em>David</em></p><p><a href=\"www.google.com\" rel=\"noopener noreferrer\" target=\"_blank\">www.google.com</a></p>";
 const defaultValue1 = '<p>Hello world!</p>';
 const defaultValue2 = '<p><strong>bold</strong></p>';
+
+Quill.register({ "blots/mention": MentionBlot, "modules/mention": Mention });
 function App() {
   const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
   const [value, setValue] = useState<RFQValue>(initialValue);
@@ -29,7 +31,7 @@ function App() {
     }
   };
   const atValues = [
-    { id: 1, value: "Fredrik Sundqvist" },
+    { id: 1, value: "Fredrik Sundqvist sdf asdf asdfads fasdf asdaf asdfdsaf dasfdsfadsfd sfdsfadf adsf d" },
     { id: 2, value: "Patrik Sjölin" }
   ];
   const hashValues = [
@@ -48,7 +50,7 @@ function App() {
           modules={{
             mention: {
               allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
-              mentionDenotationChars: ["@", "#"],
+              denotationChars: ["@", "#"],
               source: function (searchTerm, renderList, mentionChar) {
                 let values;
 
