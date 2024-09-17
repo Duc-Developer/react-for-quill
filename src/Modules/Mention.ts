@@ -164,7 +164,7 @@ export interface MentionOption {
    * @param searchTerm
    * @returns
    */
-  renderItem: (item: { id: string; value: string; [key: string]: unknown }, searchTerm: string) => string | HTMLElement;
+  renderItem: (item: { id: string; value: string;[key: string]: unknown }, searchTerm: string) => string | HTMLElement;
 
   /**
    * A function that returns the HTML for a loading message during async calls from source. The function will need to return either a string possibly containing unsanitized user content, or a class implementing the Node interface which will be treated as a sanitized DOM node. The default functions returns null to prevent a loading message.
@@ -229,7 +229,7 @@ export class Mention extends Module<MentionOption> {
   private itemIndex: number;
   private mentionCharPos?: number;
   private cursorPos?: number;
-  private values: { id: string; value: string; [key: string]: unknown }[];
+  private values: { id: string; value: string;[key: string]: unknown }[];
   private suspendMouseEnter: boolean;
   /**
    * this token is an object that may contains one key "abandoned", set to
@@ -249,7 +249,9 @@ export class Mention extends Module<MentionOption> {
     this.suspendMouseEnter = false;
 
     if (Array.isArray(options?.nodeAttributes)) {
-      this.options.nodeAttributes = this.options.nodeAttributes ? this.options.nodeAttributes.concat(options.nodeAttributes) : options.nodeAttributes;
+      this.options.nodeAttributes = this.options.nodeAttributes
+        ? this.options.nodeAttributes.concat(options.nodeAttributes)
+        : options.nodeAttributes;
     }
 
     //Bind all option-functions so they have a reasonable context
@@ -262,7 +264,11 @@ export class Mention extends Module<MentionOption> {
       }
     }
 
-    //create mention container
+    this._initDropdownContainer();
+    this._initEventListeners();
+  }
+
+  private _initDropdownContainer() {
     this.mentionContainer = document.createElement('div');
     this.mentionContainer.className = this.options?.mentionClasses.dropdownContainer ?? '';
     this.mentionContainer.style.cssText = 'display: none; position: absolute;';
@@ -274,58 +280,44 @@ export class Mention extends Module<MentionOption> {
 
     this.mentionList = document.createElement('ul');
     this.mentionList.id = 'quill-mention-list';
-    quill.root.setAttribute('aria-owns', 'quill-mention-list');
+    this.quill.root.setAttribute('aria-owns', 'quill-mention-list');
     this.mentionList.className = this.options?.mentionClasses?.dropdownList ?? '';
     this.mentionContainer.appendChild(this.mentionList);
+  }
 
-    quill.on('text-change', this.onTextChange.bind(this));
-    quill.on('selection-change', this.onSelectionChange.bind(this));
+  private _initEventListeners() {
+    this.quill.on('text-change', this.onTextChange.bind(this));
+    this.quill.on('selection-change', this.onSelectionChange.bind(this));
 
-    quill.container.addEventListener('paste', () => {
+    this.quill.container.addEventListener('paste', () => {
       setTimeout(() => {
-        const range = quill.getSelection();
+        const range = this.quill.getSelection();
         this.onSelectionChange(range);
       });
     });
 
-    quill.keyboard.addBinding(
-      {
-        key: KEYS.TAB
-      },
-      this.selectHandler.bind(this)
-    );
-    quill.keyboard.bindings[KEYS.TAB].unshift(quill.keyboard.bindings[KEYS.TAB].pop()!);
+    const handleSelect = this.selectHandler.bind(this);
+    const handleEscape = this.escapeHandler.bind(this);
+    const handleArrowUp = this.upHandler.bind(this);
+    const handleArrowDown = this.downHandler.bind(this);
 
-    for (let selectKey of this.options.selectKeys ?? []) {
-      quill.keyboard.addBinding(
-        {
-          key: selectKey
-        },
-        this.selectHandler.bind(this)
-      );
+    // Tab and Enter key listeners
+    this.quill.keyboard.addBinding({ key: KEYS.TAB }, handleSelect);
+    this.quill.keyboard.bindings[KEYS.TAB].unshift(this.quill.keyboard.bindings[KEYS.TAB].pop());
+
+    for (let key of this.options.selectKeys ?? []) {
+      this.quill.keyboard.addBinding({ key }, handleSelect);
     }
-    quill.keyboard.bindings[KEYS.ENTER].unshift(quill.keyboard.bindings[KEYS.ENTER].pop()!);
+    this.quill.keyboard.bindings[KEYS.ENTER].unshift(this.quill.keyboard.bindings[KEYS.ENTER].pop());
 
-    quill.keyboard.addBinding(
-      {
-        key: KEYS.ESCAPE
-      },
-      this.escapeHandler.bind(this)
-    );
+    // Escape key listener
+    this.quill.keyboard.addBinding({ key: KEYS.ESCAPE }, handleEscape);
 
-    quill.keyboard.addBinding(
-      {
-        key: KEYS.UP
-      },
-      this.upHandler.bind(this)
-    );
+    // Arrow Up key listener
+    this.quill.keyboard.addBinding({ key: KEYS.UP }, handleArrowUp);
 
-    quill.keyboard.addBinding(
-      {
-        key: KEYS.DOWN
-      },
-      this.downHandler.bind(this)
-    );
+    // Arrow Down key listener
+    this.quill.keyboard.addBinding({ key: KEYS.DOWN }, handleArrowDown);
   }
 
   selectHandler() {
@@ -533,7 +525,7 @@ export class Mention extends Module<MentionOption> {
     }
   }
 
-  renderList(mentionChar: string, data: { id: string; value: string; [key: string]: string | undefined }[], searchTerm: string) {
+  renderList(mentionChar: string, data: { id: string; value: string;[key: string]: string | undefined }[], searchTerm: string) {
     if (data && data.length > 0) {
       this.removeLoading();
 
@@ -659,8 +651,8 @@ export class Mention extends Module<MentionOption> {
     }
     const containerHeight = this.mentionContainer.offsetHeight;
 
-    let topPos = this.options.offsetTop!;
-    let leftPos = this.options.offsetLeft!;
+    let topPos = this.options.offsetTop;
+    let leftPos = this.options.offsetLeft;
 
     if (this.options.fixedMentionDropdown) {
       const rightPos = 0;
@@ -683,7 +675,7 @@ export class Mention extends Module<MentionOption> {
       }
 
       if (topPos + containerPos.top <= 0) {
-        let overMentionCharPos = this.options.offsetTop!;
+        let overMentionCharPos = this.options.offsetTop;
 
         if (this.options.fixedMentionDropdown) {
           overMentionCharPos += containerPos.height;
@@ -701,7 +693,7 @@ export class Mention extends Module<MentionOption> {
       }
 
       if (this.containerBottomIsNotVisible(topPos, containerPos)) {
-        let overMentionCharPos = this.options.offsetTop! * -1;
+        let overMentionCharPos = this.options.offsetTop * -1;
 
         if (!this.options.fixedMentionDropdown) {
           overMentionCharPos += mentionCharPos.top;
@@ -752,8 +744,8 @@ export class Mention extends Module<MentionOption> {
     //Which rectangle should it be relative to
     const relativeToPos = this.options.fixedMentionDropdown ? containerPos : mentionCharPosAbsolute;
 
-    let topPos = this.options.offsetTop!;
-    let leftPos = this.options.offsetLeft!;
+    let topPos = this.options.offsetTop;
+    let leftPos = this.options.offsetLeft;
 
     // handle horizontal positioning
     if (this.options.fixedMentionDropdown) {
@@ -816,7 +808,7 @@ export class Mention extends Module<MentionOption> {
   }
 
   getTextBeforeCursor() {
-    const startPos = Math.max(0, (this.cursorPos ?? 0) - this.options.maxChars!);
+    const startPos = Math.max(0, (this.cursorPos ?? 0) - this.options.maxChars);
     const textBeforeCursorPos = this.quill.getText(startPos, (this.cursorPos ?? 0) - startPos);
     return textBeforeCursorPos;
   }
@@ -828,10 +820,10 @@ export class Mention extends Module<MentionOption> {
     this.cursorPos = range.index;
     const textBeforeCursor = this.getTextBeforeCursor();
 
-    const textOffset = Math.max(0, this.cursorPos - this.options.maxChars!);
+    const textOffset = Math.max(0, this.cursorPos - this.options.maxChars);
     const textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : '';
 
-    const {denotationChars, isolateCharacter, allowInlineMentionChar} = this.options ?? {};
+    const { denotationChars, isolateCharacter, allowInlineMentionChar } = this.options ?? {};
     const { mentionChar, mentionCharIndex } = MentionUtils.getMentionCharIndex(
       textBeforeCursor,
       denotationChars,

@@ -1,7 +1,9 @@
 import { promises as fsASync, watch } from 'fs';
 import CleanCSS from 'clean-css';
+import os from 'os';
+
 const utilities = require('./utilities');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 const { visualizer } = utilities;
 
@@ -90,17 +92,26 @@ const build = async (watching) => {
 
         const runWithDemo = process.argv.includes('--demo');
         if (watching && runWithDemo) {
-            const commands = `
-            export MODE=development &&
-            bun link &&
-            cd demo &&
-            bun install &&
-            bun run dev 
-        `;
-            exec(commands, (error) => {
-                if (error) console.error(`Execution error: ${error}`);
-            });
-            console.log('\u001b]8;;http://localhost:3000/react-for-quill/\u0007\x1b[34mClick to visualize demo app\x1b[0m\u001b]8;;\u0007');
+            const isWindows = os.platform() === 'win32';
+            const setMode = isWindows ? 'set' : 'export';
+            const commands = `${setMode} MODE=development &&  bun link && cd demo && bun install && bun run dev`;
+
+            if (isWindows) {
+                const child = spawn(commands, {
+                    shell: true,
+                    stdio: 'inherit'
+                });
+
+                child.on('error', (error) => {
+                    console.error(`Execution error: ${error}`);
+                });
+                console.log('Click to visualize demo app: http://localhost:3000/react-for-quill');
+            } else {
+                exec(commands, (error) => {
+                    if (error) console.error(`Execution error: ${error}`);
+                });
+                console.log('\u001b]8;;http://localhost:3000/react-for-quill/\u0007\x1b[34mClick to visualize demo app\x1b[0m\u001b]8;;\u0007');
+            }
         }
     } catch (error) {
         console.error('Build failed:', error);
