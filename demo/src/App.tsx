@@ -1,4 +1,4 @@
-import ReactForQuill, { RFQValue, MentionBlot, Mention, Quill } from 'react-for-quill';
+import ReactForQuill, { RFQValue, MentionBlot, Mention } from 'react-for-quill';
 import './App.css';
 import { useEffect, useState } from 'react';
 import mentionData from './dummy/mention-data.json';
@@ -12,7 +12,7 @@ const defaultValue2 = '<p><strong>bold</strong></p>';
 import xml from 'highlight.js/lib/languages/xml';
 
 hljs.registerLanguage('xml', xml);
-Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
+ReactForQuill.Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
 
 function App() {
   const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
