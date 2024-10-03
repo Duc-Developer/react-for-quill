@@ -3,15 +3,6 @@ import Quill, { QuillOptions, Parchment } from 'quill';
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Delta, EmitterSource } from 'quill/core';
 
-import { CUSTOM_MODULES } from '@modules/index';
-import customModules from '@modules/index';
-const { Mention, MentionBlot } = customModules;
-
-Quill.register({
-  [`formats/${CUSTOM_MODULES.MENTION_BLOT}`]: MentionBlot,
-  [`modules/${CUSTOM_MODULES.MENTION}`]: Mention
-}, true);
-
 const ReactForQuill = forwardRef((props: IReactForQuill, ref: React.MutableRefObject<Quill>) => {
   const { readOnly, defaultValue, className, style, onKeyUp, onChange, onQuillEventChange, onBlur, onDoubleClick } = props;
   const quillRef = useRef<Quill | null>(ref?.current ?? null);
