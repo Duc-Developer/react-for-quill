@@ -4,4 +4,6 @@
  * Version: 1.0.0
  * Author: Duc-Developer
  * License: MIT
+ * Repository: https://github.com/Duc-Developer/react-for-quill
+ * Published at: __PUBLISHED_AT__
  */

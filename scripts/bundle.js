@@ -11,7 +11,9 @@ const prepareHeader = async (headerPath) => {
     const packageJson = await fsASync.readFile('package.json', 'utf8');
     const version = JSON.parse(packageJson).version;
     const headerContent = await fsASync.readFile(headerPath, 'utf8');
-    return headerContent.replace(/(Version: )[\d.]+/, `$1${version}`);
+    return headerContent
+    .replace(/(Version: )[\d.]+/, `$1${version}`)
+    .replace(/(__PUBLISHED_AT__)/, new Date().toString());
 };
 const prependHeader = async (headerContent, bundlePath) => {
     const bundleContent = await fsASync.readFile(bundlePath, 'utf8');
