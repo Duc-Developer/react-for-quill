@@ -1,12 +1,9 @@
 import Quill from 'quill';
 import RootComponent from '@components/ReactForQuill';
+import MentionBlot, { MentionBlotData, isMentionBlot, MentionEvent } from '@src/Blots/MentionBlot';
+import Mention, { MentionClasses, MentionOption } from '@src/Modules/Mention';
 
-export * from '@modules/index';
 export * as Models from '@src/Models/index.model';
-
-export * from '@src/Blots';
-export * from '@src/Modules/Mention';
-
 export * from '@src/constants';
 
 type rootType = typeof RootComponent;
@@ -15,4 +12,13 @@ const ReactForQuill = {
     ...RootComponent,
     Quill
 } as RFQComponent;
+export {
+    MentionBlot,
+    MentionBlotData,
+    isMentionBlot,
+    MentionEvent,
+    Mention,
+    MentionClasses,
+    MentionOption
+};
 export default ReactForQuill;

@@ -127,4 +127,5 @@ class MentionBlot extends Embed {
   }
 }
 
-export { MentionBlot, MentionBlotData, isMentionBlot, MentionEvent };
+export { MentionBlotData, isMentionBlot, MentionEvent };
+export default MentionBlot;
