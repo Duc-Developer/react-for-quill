@@ -56,11 +56,10 @@ or
 
 Implement your code
 ```jsx
-import React, { useState, RFQValue, MentionBlot, Mention } from 'react';
-import ReactQuill from 'react-for-quill';
+import React, { useState } from 'react';
+import ReactQuill, { RFQValue } from 'react-for-quill';
 import 'react-for-quill/dist/quill.snow.css';
 
-ReactForQuill.Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
 const defaultValue = '<p>Hello World!<p>';
 function MyComponent() {
   const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
@@ -75,26 +74,6 @@ function MyComponent() {
         theme='snow' // or bubble
         defaultValue={initialValue}
         onChange={onChange}
-        modules={{
-            mention: {
-              allowedChars: /^[A-Za-z\s]*$/,
-              denotationChars: ["@"],
-              source: function (searchTerm, renderList) {
-                if (searchTerm.length === 0) {
-                  renderList(mentionData, searchTerm);
-                } else {
-                  const matches = [];
-                  for (let i = 0; i < mentionData.length; i++) {
-                    const matched = mentionData[i].value.toLowerCase().indexOf(searchTerm.toLowerCase());
-                    if (matched > -1) {
-                      matches.push(mentionData[i]);
-                    }
-                  }
-                  renderList(matches, searchTerm);
-                }
-              }
-            }
-          }}
       />
     </>
   );
