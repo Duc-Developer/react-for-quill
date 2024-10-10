@@ -43,6 +43,8 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
               bun-version: 1.1.13
+      - name: Check Environment Mode
+        run: echo "Environment Mode is $MODE"
       - name: Building demo source...
         run: |
           cd demo && bun install &&  bun packages:version && bun run build
