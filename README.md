@@ -50,6 +50,11 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.bubble.css" />
 ```
 
+> [!WARNING]  
+> jsdelivr alway cached when i publish new version. 
+> So *@latest* flag can be older version.
+> U can be wait or clear cached in [jsdelivr](https://www.jsdelivr.com/tools/purge)
+
 ---
 
 ### Basic Usage
