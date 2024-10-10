@@ -32,6 +32,14 @@ jobs:
         run: |
           cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
           cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
+      - name: Zip bundle file
+        run: |
+          zip -r bundle.zip ./dist
+      - name: Upload ZIP file
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundle
+          path: bundle.zip
   clone_demo:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
