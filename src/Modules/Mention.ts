@@ -1,276 +1,900 @@
-import DOMPurify from 'dompurify';
 import Quill from 'quill';
-import { Delta, EmitterSource, Module } from 'quill/core';
+import { KEYS } from '@src/constants';
+import { MentionUtils } from '@src/utilities';
+import type { Delta, EmitterSource, Range } from 'quill/core';
 
-import { CUSTOM_MODULES } from '.';
+const Module = Quill.import('core/module');
 
-const Loader = `<div class='mention-loader'></div>`;
-const DEFAULT_SUGGEST_KEY = '@';
-export interface ISuggestItem {
-    label: string;
-    value: string;
-    [key: string]: any;
+export interface MentionClasses {
+  dropdownContainer?: string;
+  dropdownList?: string;
+  dropdownItem?: string;
 }
-export interface MentionModuleOptions {
-    getSuggestions: (query: string) => Promise<ISuggestItem[]>;
-    mentioned?: (op: ISuggestItem) => void;
-    suggestKey?: string;
-    style?: Record<string, string>;
+export interface MentionOption {
+  /**
+   * Specifies which characters will trigger dropdown list of mentions
+   * @default ["@"]
+   */
+  denotationChars: string[];
+
+  /**
+   * U can choose to show denotation character in the mention item or not
+   * @default true
+   */
+  showPrefix: boolean;
+
+  /**
+   * Allowed characters in search term triggering a search request using regular expressions.
+   * @default /^[a-zA-Z0-9_]*$/
+   */
+  allowedChars: RegExp | ((char: string) => RegExp);
+
+  /**
+   * Minimum characters to type before the mention dropdown is shown
+   * @default 0
+   */
+  minChars: number;
+
+  /**
+   * Maximum characters to type before the mention dropdown is shown
+   * @default 31
+   */
+  maxChars: number;
+
+  /**
+   * Additional top offset of the mention container position
+   * @default 2
+   */
+  offsetTop: number;
+
+  /**
+   * Additional left offset of the mention container position
+   * @default 0
+   */
+  offsetLeft: number;
+
+  /**
+   * Whether or not the denotation character(s) should be isolated. For example, to avoid mentioning in an email.
+   * @default false
+   */
+  isolateCharacter: boolean;
+
+  /**
+   * Only works if isolateCharacter is set to true. Whether or not the denotation character(s) can appear inline of the mention text. For example, to allow mentioning an email with the @ symbol as the denotation character.
+   * @default false
+   */
+  allowInlineMentionChar: boolean;
+
+  /**
+   * If true, the mentions dropdown will be rendered above or below the quill container. Otherwise, the mentions dropdown will track the denotation character(s);
+   * @default false
+   */
+  fixedMentionDropdown: boolean;
+
+  /**
+   * Options are 'normal' and 'fixed'. When 'fixed', the dropdown will be appended to the body and use fixed positioning. Use this if the dropdown is clipped by a parent element that's using `overflow:hidden
+   * @default "normal"
+   */
+  positioningStrategy: 'normal' | 'fixed';
+  /**
+   * Options are 'bottom' and 'top'. Determines what the default orientation of the dropdown will be.
+   * It will attempt to render the dropdown either above or below the editor.
+   * If 'top' is provided as a value, and there is not enough space above the editor, the dropdown will be rendered below.
+   * Vice versa, if there is not enough space below the editor, and 'bottom' is provided as a value (or no value is provided at all), the dropdown will be rendered above the editor.
+   * @default "bottom"
+   */
+  defaultMenuOrientation: 'top' | 'bottom';
+
+  /**
+   * The name of the Quill Blot to be used for inserted mentions.
+   * @default "mentionBlot"
+   */
+  blotName: string;
+
+  /**
+   * A list of data values you wish to be passed from your list data to the html node. (id, value, denotationChar, link, target are included by default).
+   * @default ["id", "value", "denotationChar", "link", "target", "disabled"]
+   */
+  nodeAttributes: string[];
+
+  /**
+   * Link target for mentions with a link
+   * @default "_blank"
+   */
+  linkTarget: string;
+
+  /**
+   * Style class to be used for dropdown and children of it (may be null)
+   * @default {dropdownContainer: "rfq-mention-list-container", dropdownList: "rfq-mention-list", dropdownItem: "rfq-mention-list-item"}
+   */
+  mentionClasses?: MentionClasses;
+
+  /**
+   * default we insert a space after the mention. Set this to false if you don't want that to happen.
+   * @default true
+   */
+  spaceAfterInsert: boolean;
+
+  /**
+   * An array of keyboard key codes that will trigger the select action for the mention dropdown. Default is ENTER key. See this reference for a list of numbers for each keyboard key.
+   * @default [13]
+   */
+  selectKeys: (string | number | string)[];
+  /**
+   * Required callback function to handle the search term and connect it to a data source for matches. The data source can be a local source or an AJAX request.
+   * The callback should call renderList(matches, searchTerm); with matches of JSON Objects in an array to show the result for the user. The JSON Objects should have id and value but can also have other values to be used in renderItem for custom display.
+   * @param textAfter
+   * @param render
+   * @param mentionChar
+   * @returns
+   */
+  source: (
+    textAfter: string,
+    renderList: (
+      matches: {
+        id: string;
+        value: string;
+        [key: string]: string | undefined;
+      }[],
+      searchTerm: string
+    ) => void,
+    mentionChar: string
+  ) => void;
+
+  /**
+   * Callback when mention dropdown is open.
+   * @returns
+   */
+  onOpen: () => boolean;
+
+  /**
+   * Callback before the DOM of mention dropdown is removed.
+   * @returns
+   */
+  onBeforeClose: () => boolean;
+
+  /**
+   * Callback when mention dropdown is closed.
+   * @returns
+   */
+  onClose: () => boolean;
+  /**
+   * A function that gives you control over how matches from source are displayed. You can use this function to highlight the search term or change the design with custom HTML. This function will need to return either a string possibly containing unsanitized user content, or a class implementing the Node interface which will be treated as a sanitized DOM node.
+   * @param item
+   * @param searchTerm
+   * @returns
+   */
+  renderItem: (item: { id: string; value: string;[key: string]: unknown }, searchTerm: string) => string | HTMLElement;
+
+  /**
+   * A function that returns the HTML for a loading message during async calls from source. The function will need to return either a string possibly containing unsanitized user content, or a class implementing the Node interface which will be treated as a sanitized DOM node. The default functions returns null to prevent a loading message.
+   * @returns
+   */
+  renderLoading: () => string | HTMLElement | null;
+
+  /**
+   * Callback for a selected item. When overriding this method, insertItem should be used to insert item to the editor. This makes async requests possible.
+   * @param item
+   * @param insertItem
+   */
+  onSelect: (
+    item: DOMStringMap,
+    insertItem: (data: Record<string, unknown>, programmaticInsert?: boolean, overriddenOptions?: object) => void
+  ) => void;
 }
-export default class Mention {
-    isOpen: boolean;
-    options: MentionModuleOptions = { suggestKey: DEFAULT_SUGGEST_KEY, getSuggestions: async () => [] };
-    quill: Quill;
-    popover?: HTMLElement;
-    private _selectedSuggestion: number = -1;
 
-    constructor(quill: Quill, options: MentionModuleOptions) {
-        this.quill = quill;
-        if (options) this.options = { ...this.options, ...options };
-        this.isOpen = false;
+export class Mention extends Module<MentionOption> {
+  static DEFAULTS: MentionOption = {
+    denotationChars: ['@'],
+    showPrefix: true,
+    allowedChars: /^[a-zA-Z0-9_]*$/,
+    minChars: 0,
+    maxChars: 36,
+    offsetTop: 2,
+    offsetLeft: 0,
+    isolateCharacter: false,
+    allowInlineMentionChar: false,
+    fixedMentionDropdown: false,
+    positioningStrategy: 'normal',
+    defaultMenuOrientation: 'bottom',
+    blotName: 'mentionBlot',
+    nodeAttributes: ['id', 'value', 'denotationChar', 'link', 'target', 'disabled'],
+    linkTarget: '_blank',
+    mentionClasses: {
+      dropdownContainer: 'rfq-mention-list-container',
+      dropdownList: 'rfq-mention-list',
+      dropdownItem: 'rfq-mention-list-item'
+    },
+    spaceAfterInsert: true,
+    selectKeys: [KEYS.ENTER],
+    source: (searchTerm, renderList, mentionChar) => {
+      renderList(
+        [] as {
+          id: string;
+          value: string;
+          [key: string]: string | undefined;
+        }[],
+        searchTerm
+      );
+    },
+    renderItem: ({ value }) => `${value}`,
+    onSelect: (item, insertItem) => insertItem(item),
+    onOpen: () => true,
+    onBeforeClose: () => true,
+    onClose: () => true,
+    renderLoading: () => null
+  };
 
-        if (!this.isValidOption(options)) return;
+  private isOpen: boolean;
+  private itemIndex: number;
+  private mentionCharPos?: number;
+  private cursorPos?: number;
+  private values: { id: string; value: string;[key: string]: unknown }[];
+  private suspendMouseEnter: boolean;
+  /**
+   * this token is an object that may contains one key "abandoned", set to
+   * true when the previous source call should be ignored in favor or a
+   * more recent execution. This token will be undefined unless a source call
+   * is in progress.
+   */
+  private existingSourceExecutionToken?: { abandoned: boolean };
+  private mentionContainer: HTMLDivElement;
+  private mentionList: HTMLUListElement;
 
-        if (!this.quill) return;
+  constructor(quill: Quill, options?: Partial<MentionOption>) {
+    super(quill, options);
+    this.isOpen = false;
+    this.itemIndex = 0;
+    this.values = [];
+    this.suspendMouseEnter = false;
 
-        this.onTextChange = this.onTextChange.bind(this);
-
-        this.quill.on(Quill.events.TEXT_CHANGE, this.onTextChange);
-        this.setupMentionDropdownNavigation();
+    if (Array.isArray(options?.nodeAttributes)) {
+      this.options.nodeAttributes = this.options.nodeAttributes
+        ? this.options.nodeAttributes.concat(options.nodeAttributes)
+        : options.nodeAttributes;
     }
 
-    isValidOption(options: MentionModuleOptions) {
-        const valid = options?.getSuggestions;
-        if (!valid) console.warn('%c Mention module required configured with getSuggestions function', 'font-size:14px;color:red');
-        return valid;
+    //Bind all option-functions so they have a reasonable context
+    for (let op in this.options) {
+      const key: keyof MentionOption = op as keyof MentionOption;
+      const value = this.options[key];
+      if (typeof value === 'function') {
+        // @ts-ignore
+        this.options[key] = value.bind(this);
+      }
     }
 
-    onTextChange(delta: Delta, oldContent: Delta, source: EmitterSource) {
-        if (source !== 'user') return;
+    this._initDropdownContainer();
+    this._initEventListeners();
+  }
 
-        const newCharacters = delta.ops
-            .filter((op) => op.insert)
-            .map((op) => op.insert)
-            .join('');
-        if (newCharacters?.includes('\n')) {
-            this.closeSuggestionPopover();
-            return;
+  private _initDropdownContainer() {
+    this.mentionContainer = document.createElement('div');
+    this.mentionContainer.className = this.options?.mentionClasses.dropdownContainer ?? '';
+    this.mentionContainer.style.cssText = 'display: none; position: absolute;';
+    this.mentionContainer.onmousemove = this.onContainerMouseMove.bind(this);
+
+    if (this.options.fixedMentionDropdown) {
+      this.mentionContainer.style.width = 'auto';
+    }
+
+    this.mentionList = document.createElement('ul');
+    this.mentionList.id = 'quill-mention-list';
+    this.quill.root.setAttribute('aria-owns', 'quill-mention-list');
+    this.mentionList.className = this.options?.mentionClasses?.dropdownList ?? '';
+    this.mentionContainer.appendChild(this.mentionList);
+  }
+
+  private _initEventListeners() {
+    this.quill.on('text-change', this.onTextChange.bind(this));
+    this.quill.on('selection-change', this.onSelectionChange.bind(this));
+
+    this.quill.container.addEventListener('paste', () => {
+      setTimeout(() => {
+        const range = this.quill.getSelection();
+        this.onSelectionChange(range);
+      });
+    });
+
+    const handleSelect = this.selectHandler.bind(this);
+    const handleEscape = this.escapeHandler.bind(this);
+    const handleArrowUp = this.upHandler.bind(this);
+    const handleArrowDown = this.downHandler.bind(this);
+
+    // Tab and Enter key listeners
+    this.quill.keyboard.addBinding({ key: KEYS.TAB }, handleSelect);
+    this.quill.keyboard.bindings[KEYS.TAB].unshift(this.quill.keyboard.bindings[KEYS.TAB].pop());
+
+    for (let key of this.options.selectKeys ?? []) {
+      this.quill.keyboard.addBinding({ key }, handleSelect);
+    }
+    this.quill.keyboard.bindings[KEYS.ENTER].unshift(this.quill.keyboard.bindings[KEYS.ENTER].pop());
+
+    // Escape key listener
+    this.quill.keyboard.addBinding({ key: KEYS.ESCAPE }, handleEscape);
+
+    // Arrow Up key listener
+    this.quill.keyboard.addBinding({ key: KEYS.UP }, handleArrowUp);
+
+    // Arrow Down key listener
+    this.quill.keyboard.addBinding({ key: KEYS.DOWN }, handleArrowDown);
+  }
+
+  selectHandler() {
+    if (this.isOpen && !this.existingSourceExecutionToken) {
+      this.selectItem();
+      return false;
+    }
+    return true;
+  }
+
+  escapeHandler() {
+    if (this.isOpen) {
+      if (this.existingSourceExecutionToken) {
+        this.existingSourceExecutionToken.abandoned = true;
+      }
+      this.hideMentionList();
+      return false;
+    }
+    return true;
+  }
+
+  upHandler() {
+    if (this.isOpen && !this.existingSourceExecutionToken) {
+      this.prevItem();
+      return false;
+    }
+    return true;
+  }
+
+  downHandler() {
+    if (this.isOpen && !this.existingSourceExecutionToken) {
+      this.nextItem();
+      return false;
+    }
+    return true;
+  }
+
+  showMentionList() {
+    if (this.options.positioningStrategy === 'fixed') {
+      document.body.appendChild(this.mentionContainer);
+    } else {
+      this.quill.container.appendChild(this.mentionContainer);
+    }
+
+    this.mentionContainer.style.visibility = 'hidden';
+    this.mentionContainer.style.display = '';
+    this.mentionContainer.scrollTop = 0;
+    this.setMentionContainerPosition();
+    this.setIsOpen(true);
+  }
+
+  hideMentionList() {
+    if (this.options.onBeforeClose) {
+      this.options.onBeforeClose();
+    }
+    this.mentionContainer.style.display = 'none';
+    this.mentionContainer.remove();
+    this.setIsOpen(false);
+    this.quill.root.removeAttribute('aria-activedescendant');
+  }
+
+  highlightItem(scrollItemInView = true) {
+    for (let i = 0; i < this.mentionList.childNodes.length; i += 1) {
+      const element = this.mentionList.childNodes[i];
+      if (element instanceof HTMLElement) {
+        element.classList.remove('selected');
+      }
+    }
+
+    const elementAtItemIndex = this.mentionList.childNodes[this.itemIndex] as HTMLElement;
+    if (this.itemIndex === -1 || elementAtItemIndex.dataset.disabled === 'true') {
+      return;
+    }
+
+    elementAtItemIndex.classList.add('selected');
+    this.quill.root.setAttribute('aria-activedescendant', elementAtItemIndex.id);
+
+    if (scrollItemInView) {
+      const itemHeight = elementAtItemIndex.offsetHeight;
+      const itemPos = elementAtItemIndex.offsetTop;
+      const containerTop = this.mentionContainer.scrollTop;
+      const containerBottom = containerTop + this.mentionContainer.offsetHeight;
+
+      if (itemPos < containerTop) {
+        // Scroll up if the item is above the top of the container
+        this.mentionContainer.scrollTop = itemPos;
+      } else if (itemPos > containerBottom - itemHeight) {
+        // scroll down if any part of the element is below the bottom of the container
+        this.mentionContainer.scrollTop += itemPos - containerBottom + itemHeight;
+      }
+    }
+  }
+
+  onContainerMouseMove() {
+    this.suspendMouseEnter = false;
+  }
+
+  selectItem() {
+    if (this.itemIndex === -1) {
+      return;
+    }
+    const elementAtItemIndex = this.mentionList.childNodes[this.itemIndex] as HTMLElement;
+    const data = elementAtItemIndex.dataset;
+    if (data.disabled) {
+      return;
+    }
+    this.options.onSelect?.(data, (asyncData, programmaticInsert = false, overriddenOptions = {}) => {
+      return this.insertItem(asyncData, programmaticInsert, overriddenOptions);
+    });
+    this.hideMentionList();
+  }
+
+  insertItem(data: { [key: string]: unknown } | null, programmaticInsert: boolean, overriddenOptions = {}) {
+    const render = data;
+    if (render === null || this.mentionCharPos === undefined || this.cursorPos === undefined) {
+      return;
+    }
+    const options = { ...this.options, ...overriddenOptions };
+
+    if (!options.showPrefix) {
+      render.denotationChar = '';
+    }
+
+    let insertAtPos: number;
+
+    if (!programmaticInsert) {
+      insertAtPos = this.mentionCharPos;
+      this.quill.deleteText(this.mentionCharPos, this.cursorPos - this.mentionCharPos, Quill.sources.USER);
+    } else {
+      insertAtPos = this.cursorPos;
+    }
+    const delta = this.quill.insertEmbed(insertAtPos, options.blotName ?? Mention.DEFAULTS.blotName, render, Quill.sources.USER);
+    if (options.spaceAfterInsert) {
+      this.quill.insertText(insertAtPos + 1, ' ', Quill.sources.USER);
+      // setSelection here sets cursor position
+      this.quill.setSelection(insertAtPos + 2, Quill.sources.USER);
+    } else {
+      this.quill.setSelection(insertAtPos + 1, Quill.sources.USER);
+    }
+    this.hideMentionList();
+    return delta;
+  }
+
+  onItemMouseEnter(e: Event) {
+    if (this.suspendMouseEnter || e.target instanceof HTMLElement === false) {
+      return;
+    }
+
+    const index = Number(e.target?.dataset.index);
+
+    if (!Number.isNaN(index) && index !== this.itemIndex) {
+      this.itemIndex = index;
+      this.highlightItem(false);
+    }
+  }
+
+  onDisabledItemMouseEnter() {
+    if (this.suspendMouseEnter) {
+      return;
+    }
+
+    this.itemIndex = -1;
+    this.highlightItem(false);
+  }
+
+  onItemClick(e: Event) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (e.currentTarget instanceof HTMLElement === false) {
+      return;
+    }
+    this.itemIndex = e.currentTarget?.dataset.index ? Number.parseInt(e.currentTarget.dataset.index) : -1;
+    this.highlightItem();
+    this.selectItem();
+  }
+
+  onItemMouseDown(e: Event) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }
+
+  renderLoading() {
+    const renderedLoading = this.options.renderLoading?.() ?? undefined;
+    if (renderedLoading === undefined) {
+      return;
+    }
+
+    if (this.mentionContainer.getElementsByClassName('rfq-mention-loading').length > 0) {
+      this.showMentionList();
+      return;
+    }
+
+    this.mentionList.innerHTML = '';
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'rfq-mention-loading';
+    MentionUtils.setInnerContent(loadingDiv, renderedLoading);
+    this.mentionContainer.append(loadingDiv);
+    this.showMentionList();
+  }
+
+  removeLoading() {
+    const loadingDiv = this.mentionContainer.getElementsByClassName('rfq-mention-loading');
+    if (loadingDiv.length > 0) {
+      loadingDiv[0].remove();
+    }
+  }
+
+  renderList(mentionChar: string, data: { id: string; value: string;[key: string]: string | undefined }[], searchTerm: string) {
+    if (data && data.length > 0) {
+      this.removeLoading();
+
+      this.values = data;
+      this.mentionList.innerText = '';
+
+      let initialSelection = -1;
+
+      for (let i = 0; i < data.length; i += 1) {
+        const li = document.createElement('li');
+        li.id = 'rfq-quill-mention-item-' + i;
+        li.className = this.options?.mentionClasses?.dropdownItem ?? '';
+        if (data[i].disabled) {
+          li.className += ' disabled';
+          li.setAttribute('aria-hidden', 'true');
+        } else if (initialSelection === -1) {
+          initialSelection = i;
         }
-
-        const isDeletingMention = this.onDeleteMention(delta);
-        if (isDeletingMention) return;
-
-        const mentionData = this.getTextAfterMention();
-
-        if (!mentionData) {
-            this.closeSuggestionPopover();
+        li.dataset.index = i.toString();
+        const renderedItem = this.options.renderItem!(data[i], searchTerm);
+        MentionUtils.setInnerContent(li, renderedItem);
+        if (!data[i].disabled) {
+          li.onmouseenter = this.onItemMouseEnter.bind(this);
+          li.onmouseup = this.onItemClick.bind(this);
+          li.onmousedown = this.onItemMouseDown.bind(this);
         } else {
-            const { text, index } = mentionData;
-            this.isOpen = true;
-            this.openSuggestionPopover(text, index);
+          li.onmouseenter = this.onDisabledItemMouseEnter.bind(this);
         }
+        li.dataset.denotationChar = mentionChar;
+        const dataset = MentionUtils.attachDataset(li, data[i], this.options.nodeAttributes!);
+        this.mentionList.appendChild(dataset);
+      }
+      this.itemIndex = initialSelection;
+      this.highlightItem();
+      this.showMentionList();
+    } else {
+      this.hideMentionList();
+    }
+  }
+
+  nextItem() {
+    let increment = 0;
+    let newIndex: number;
+    let disabled: boolean;
+    do {
+      increment++;
+      newIndex = (this.itemIndex + increment) % this.values.length;
+      disabled = (this.mentionList.childNodes[newIndex] as HTMLElement).dataset.disabled === 'true';
+      if (increment === this.values.length + 1) {
+        //we've wrapped around w/o finding an enabled item
+        newIndex = -1;
+        break;
+      }
+    } while (disabled);
+
+    this.itemIndex = newIndex;
+    this.suspendMouseEnter = true;
+    this.highlightItem();
+  }
+
+  prevItem() {
+    let decrement = 0;
+    let newIndex: number;
+    let disabled: boolean;
+    do {
+      decrement++;
+      newIndex = (this.itemIndex + this.values.length - decrement) % this.values.length;
+      disabled = (this.mentionList.childNodes[newIndex] as HTMLElement).dataset.disabled === 'true';
+      if (decrement === this.values.length + 1) {
+        //we've wrapped around w/o finding an enabled item
+        newIndex = -1;
+        break;
+      }
+    } while (disabled);
+
+    this.itemIndex = newIndex;
+    this.suspendMouseEnter = true;
+    this.highlightItem();
+  }
+
+  containerBottomIsNotVisible(topPos: number, containerPos: DOMRect) {
+    const mentionContainerBottom = topPos + this.mentionContainer.offsetHeight + containerPos.top;
+    return mentionContainerBottom > window.scrollY + window.innerHeight;
+  }
+
+  containerRightIsNotVisible(leftPos: number, containerPos: DOMRect) {
+    if (this.options.fixedMentionDropdown) {
+      return false;
     }
 
-    getTextAfterMention(): { text: string; index: number } | null {
-        const result = { text: '', index: -1 };
-        const { suggestKey } = this.options;
-        const cursorPosition = this.quill?.getSelection()?.index;
-        if (typeof cursorPosition !== 'number') return null;
-        const delta = this.quill.getContents(0, cursorPosition);
-        
-        const matchedIndex = delta.ops.findLastIndex((op) => {
-            const isMentioned = op?.attributes && Boolean(CUSTOM_MODULES.MENTION_BLOT in op.attributes);
-            const matched = typeof op?.insert === 'string' && op.insert.includes(suggestKey) && !isMentioned;
-            return matched;
-        });
-        const hasMention = delta.ops[matchedIndex];
-        if (typeof hasMention?.insert !== 'string') return null;
+    const rightPos = leftPos + this.mentionContainer.offsetWidth + containerPos.left;
+    const browserWidth = window.scrollX + document.documentElement.clientWidth;
+    return rightPos > browserWidth;
+  }
 
-        // calculate mention query
-        const index = hasMention.insert.lastIndexOf(suggestKey);
-        const textBeforeCursor = hasMention.insert.slice(index + 1);
-        result.text = textBeforeCursor;
+  setIsOpen(isOpen: boolean) {
+    if (this.isOpen !== isOpen) {
+      if (isOpen) {
+        this.options.onOpen?.();
+      } else {
+        this.options.onClose?.();
+      }
+      this.isOpen = isOpen;
+    }
+  }
 
-        // calculate index of mention query
-        result.index = delta.ops.slice(0, matchedIndex + 1).reduce((acc, op, i) => {
-            if (matchedIndex === i) return acc + index;
-            if (typeof op.insert === 'string') return acc + op.insert.length;
-            if (op.insert instanceof Module) return acc + 1;
-            return acc;
-        }, 0);
-        console.log(result);
-        return result;
+  setMentionContainerPosition() {
+    if (this.options.positioningStrategy === 'fixed') {
+      this.fixedMentionContainer();
+    } else {
+      this.observedMentionContainer();
+    }
+  }
+
+  observedMentionContainer() {
+    if (this.mentionCharPos === undefined) {
+      return;
+    }
+    const containerPos = this.quill.container.getBoundingClientRect();
+    const mentionCharPos = this.quill.getBounds(this.mentionCharPos);
+    if (mentionCharPos === null) {
+      return;
+    }
+    const containerHeight = this.mentionContainer.offsetHeight;
+
+    let topPos = this.options.offsetTop;
+    let leftPos = this.options.offsetLeft;
+
+    if (this.options.fixedMentionDropdown) {
+      const rightPos = 0;
+      this.mentionContainer.style.right = `${rightPos}px`;
+    } else {
+      leftPos += mentionCharPos.left;
     }
 
-    onDeleteMention(delta: Delta) {
-        const ops = delta.ops;
-        const index = ops[0]?.retain;
-        if (typeof index !== 'number') return;
-        const deletedLength = ops[1]?.delete;
-        if (typeof deletedLength !== 'number') return;
+    if (this.containerRightIsNotVisible(leftPos, containerPos)) {
+      const containerWidth = this.mentionContainer.offsetWidth + this.options.offsetLeft!;
+      const quillWidth = containerPos.width;
+      leftPos = quillWidth - containerWidth;
+    }
 
-        const contentBeforeDeletion = this.quill.getContents(0, index);
-        const lastOp = contentBeforeDeletion.ops[contentBeforeDeletion.ops.length - 1];
+    if (this.options.defaultMenuOrientation === 'top') {
+      if (this.options.fixedMentionDropdown) {
+        topPos = -1 * (containerHeight + this.options.offsetTop!);
+      } else {
+        topPos = mentionCharPos.top - (containerHeight + this.options.offsetTop!);
+      }
 
-        const isDeletingMention = lastOp.insert && lastOp.attributes && lastOp.attributes?.[CUSTOM_MODULES.MENTION_BLOT];
-        if (isDeletingMention) {
-            const mentionLength = typeof lastOp.insert === 'string' ? lastOp.insert.length : 1;
+      if (topPos + containerPos.top <= 0) {
+        let overMentionCharPos = this.options.offsetTop;
 
-            const deleteMentionDelta = new Delta().retain(index - mentionLength).delete(mentionLength + deletedLength);
-
-            this.quill.updateContents(deleteMentionDelta, 'user');
+        if (this.options.fixedMentionDropdown) {
+          overMentionCharPos += containerPos.height;
+        } else {
+          overMentionCharPos += mentionCharPos.bottom;
         }
-        return isDeletingMention;
-    }
 
-    getEditorContainer(): HTMLElement {
-        return this.quill.container;
-    }
+        topPos = overMentionCharPos;
+      }
+    } else {
+      if (this.options.fixedMentionDropdown) {
+        topPos += containerPos.height;
+      } else {
+        topPos += mentionCharPos.bottom;
+      }
 
-    handleOutsideClick(event: MouseEvent) {
-        if (this.popover && !this.popover.contains(event.target as Node)) {
-            this.closeSuggestionPopover();
-        }
-    }
+      if (this.containerBottomIsNotVisible(topPos, containerPos)) {
+        let overMentionCharPos = this.options.offsetTop * -1;
 
-    async openSuggestionPopover(query: string, start: number) {
-        if (!this.options?.getSuggestions || !this.isOpen) return;
-        const { getSuggestions } = this.options;
-
-        if (!this.popover) {
-            this.popover = document.createElement('div');
-            this.popover.className = 'popover-tooltip';
-            this.getEditorContainer()?.appendChild(this.popover);
-            // Improved focus out handling
-            this.popover.addEventListener('focusout', (event) => {
-                setTimeout(() => {
-                    // Delay to allow focus to move
-                    if (!this.popover?.contains(document.activeElement)) {
-                        this.closeSuggestionPopover();
-                    }
-                }, 0);
-            });
-
-            // Handle clicks outside the popover
-            document.addEventListener('click', this.handleOutsideClick.bind(this), true);
+        if (!this.options.fixedMentionDropdown) {
+          overMentionCharPos += mentionCharPos.top;
         }
 
-        const selection = this.quill?.getSelection()?.index;
-        if (!selection && selection !== 0) return;
-        const cursorPosition = this.quill?.getBounds(selection);
-        if (!cursorPosition) return;
-        this.popover.style.top = `${cursorPosition.bottom}px`;
-        this.popover.style.left = `${cursorPosition.left}px`;
+        topPos = overMentionCharPos - containerHeight;
+      }
+    }
 
-        this.popover.innerHTML = DOMPurify.sanitize(`<div class='flex justify-center'>${Loader}</div>`);
-        const suggestions = await getSuggestions(query);
+    const dropdownContainerClass = this.options?.mentionClasses?.dropdownContainer ?? '';
+    if (topPos >= 0) {
+      dropdownContainerClass.split(' ').forEach((className) => {
+        this.mentionContainer.classList.add(`${className}-bottom`);
+        this.mentionContainer.classList.remove(`${className}-top`);
+      });
+    } else {
+      dropdownContainerClass.split(' ').forEach((className) => {
+        this.mentionContainer.classList.add(`${className}-top`);
+        this.mentionContainer.classList.remove(`${className}-bottom`);
+      });
+    }
 
-        if (!suggestions.length) {
-            this.popover.innerHTML = DOMPurify.sanitize(`<div class='no-data'>NoData</div>`);
-            return;
+    this.mentionContainer.style.top = `${topPos}px`;
+    this.mentionContainer.style.left = `${leftPos}px`;
+    this.mentionContainer.style.visibility = 'visible';
+  }
+
+  fixedMentionContainer() {
+    if (this.mentionCharPos === undefined) {
+      return;
+    }
+    this.mentionContainer.style.position = 'fixed';
+    this.mentionContainer.style.height = '';
+
+    const containerPos = this.quill.container.getBoundingClientRect();
+    const mentionCharPos = this.quill.getBounds(this.mentionCharPos);
+    if (mentionCharPos === null) {
+      return;
+    }
+    const mentionCharPosAbsolute = {
+      right: containerPos.right - mentionCharPos.right,
+      left: containerPos.left + mentionCharPos.left,
+      top: containerPos.top + mentionCharPos.top,
+      width: 0,
+      height: mentionCharPos.height
+    };
+
+    //Which rectangle should it be relative to
+    const relativeToPos = this.options.fixedMentionDropdown ? containerPos : mentionCharPosAbsolute;
+
+    let topPos = this.options.offsetTop;
+    let leftPos = this.options.offsetLeft;
+
+    // handle horizontal positioning
+    if (this.options.fixedMentionDropdown) {
+      const rightPos = relativeToPos.right;
+      this.mentionContainer.style.right = `${rightPos}px`;
+    } else {
+      leftPos += relativeToPos.left;
+
+      //if its off the righ edge, push it back
+      if (leftPos + this.mentionContainer.offsetWidth > document.documentElement.clientWidth) {
+        leftPos -= leftPos + this.mentionContainer.offsetWidth - document.documentElement.clientWidth;
+      }
+    }
+
+    const availableSpaceTop = relativeToPos.top;
+    const availableSpaceBottom = document.documentElement.clientHeight - (relativeToPos.top + relativeToPos.height);
+
+    const fitsBottom = this.mentionContainer.offsetHeight <= availableSpaceBottom;
+    const fitsTop = this.mentionContainer.offsetHeight <= availableSpaceTop;
+
+    let placement: 'top' | 'bottom';
+    if (this.options.defaultMenuOrientation === 'top' && fitsTop) {
+      placement = 'top';
+    } else if (this.options.defaultMenuOrientation === 'bottom' && fitsBottom) {
+      placement = 'bottom';
+    } else {
+      //it doesnt fit either so put it where there's the most space
+      placement = availableSpaceBottom > availableSpaceTop ? 'bottom' : 'top';
+    }
+
+    const mentionContainerClass = this.options?.mentionClasses?.dropdownContainer ?? '';
+    if (placement === 'bottom') {
+      topPos = relativeToPos.top + relativeToPos.height;
+      if (!fitsBottom) {
+        //shrink it to fit
+        //3 is a bit of a fudge factor so it doesnt touch the edge of the screen
+        this.mentionContainer.style.height = availableSpaceBottom - 3 + 'px';
+      }
+
+      mentionContainerClass.split(' ').forEach((className) => {
+        this.mentionContainer.classList.add(`${className}-bottom`);
+        this.mentionContainer.classList.remove(`${className}-top`);
+      });
+    } else {
+      topPos = relativeToPos.top - this.mentionContainer.offsetHeight;
+      if (!fitsTop) {
+        this.mentionContainer.style.height = availableSpaceTop - 3 + 'px';
+        topPos = 3;
+      }
+
+      mentionContainerClass.split(' ').forEach((className) => {
+        this.mentionContainer.classList.add(`${className}-top`);
+        this.mentionContainer.classList.remove(`${className}-bottom`);
+      });
+    }
+
+    this.mentionContainer.style.top = `${topPos}px`;
+    this.mentionContainer.style.left = `${leftPos}px`;
+    this.mentionContainer.style.visibility = 'visible';
+  }
+
+  getTextBeforeCursor() {
+    const startPos = Math.max(0, (this.cursorPos ?? 0) - this.options.maxChars);
+    const textBeforeCursorPos = this.quill.getText(startPos, (this.cursorPos ?? 0) - startPos);
+    return textBeforeCursorPos;
+  }
+
+  onSomethingChange() {
+    const range = this.quill.getSelection();
+    if (range == null) return;
+
+    this.cursorPos = range.index;
+    const textBeforeCursor = this.getTextBeforeCursor();
+
+    const textOffset = Math.max(0, this.cursorPos - this.options.maxChars);
+    const textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : '';
+
+    const { denotationChars, isolateCharacter, allowInlineMentionChar } = this.options ?? {};
+    const { mentionChar, mentionCharIndex } = MentionUtils.getMentionCharIndex(
+      textBeforeCursor,
+      denotationChars,
+      isolateCharacter,
+      allowInlineMentionChar
+    );
+
+    if (mentionChar !== null && MentionUtils.isValidCharIndex(mentionCharIndex, textBeforeCursor, isolateCharacter, textPrefix)) {
+      const mentionCharPos = this.cursorPos - (textBeforeCursor.length - mentionCharIndex);
+      this.mentionCharPos = mentionCharPos;
+      const textAfter = textBeforeCursor.substring(mentionCharIndex + mentionChar.length);
+      if (textAfter.length >= this.options.minChars! && MentionUtils.isValidChars(textAfter, this.getAllowedCharsRegex(mentionChar))) {
+        if (this.existingSourceExecutionToken) {
+          this.existingSourceExecutionToken.abandoned = true;
         }
-        this._selectedSuggestion = 0; // init selected when searching
-
-        const content = suggestions
-            .map((item, i) => {
-                const userId = item.value;
-                const userName = item.label;
-                return `<div class='mention-item ${i === 0 ? 'highlight' : ''}' title='${userName}' data-user-id='${userId}' data-user-name='${userName}'>${userName}</div>`;
-            })
-            .join('');
-        this.popover.innerHTML = DOMPurify.sanitize(content);
-
-        this.popover.querySelectorAll('.mention-item').forEach((item) => {
-            item.addEventListener('click', (e) => {
-                const target = e.target as HTMLElement;
-                const { userId } = target?.dataset ?? {};
-                if (!userId) return;
-                const user = suggestions.find((s) => {
-                    if (typeof s.value !== 'number' && !s.value) return false;
-                    return s.value.toString() === userId;
-                });
-                if (!user) return;
-                this.insertMention(user, start, query.length);
-            });
-        });
-    }
-
-    insertMention(user: ISuggestItem, start: number, range: number) {
-        const { suggestKey, mentioned, style } = this.options;
-        const { label: name, value: id } = user;
-        this.closeSuggestionPopover();
-        this.quill.deleteText(start, range + 1);
-        const deltaAtPosition = new Delta()
-            .retain(start)
-            .insert(`${suggestKey}${name}`, { [CUSTOM_MODULES.MENTION_BLOT]: { id, style } })
-            .insert('\u200B');
-        this.quill.updateContents(deltaAtPosition);
-        this.quill.setSelection(start + name.length + 2);
-        mentioned?.(user);
-    }
-
-    setupMentionDropdownNavigation() {
-        this.getEditorContainer()?.addEventListener('keydown', this.handleKeyDown.bind(this), true);
-    }
-
-    handleKeyDown(event: KeyboardEvent) {
-        if (!this.popover) return;
-        const items = this.popover.querySelectorAll('.mention-item');
-        if (items.length === 0) return;
-        let next = this._selectedSuggestion;
-        switch (event.key) {
-            case 'ArrowDown':
-                next = next + 1;
-                this._selectedSuggestion = next > items.length - 1 ? 0 : next;
-                event.preventDefault();
-                break;
-            case 'ArrowUp':
-                next = next - 1;
-                this._selectedSuggestion = next < 0 ? items.length - 1 : next;
-                event.preventDefault();
-                break;
-            case 'Enter':
-                const currentSelectedItem = items[this._selectedSuggestion] as HTMLElement;
-                if (!currentSelectedItem) {
-                    this.closeSuggestionPopover();
-                    break;
-                }
-                currentSelectedItem.click();
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            case 'Escape':
-                event.preventDefault();
-                event.stopPropagation();
-                this.closeSuggestionPopover();
-                break;
-            case 'ArrowRight':
-            case 'ArrowLeft':
-                event.preventDefault();
-                break;
-            default:
-                break;
+        this.renderLoading();
+        const sourceRequestToken = {
+          abandoned: false
+        };
+        this.existingSourceExecutionToken = sourceRequestToken;
+        this.options.source?.(
+          textAfter,
+          (data, searchTerm) => {
+            if (sourceRequestToken.abandoned) {
+              return;
+            }
+            this.existingSourceExecutionToken = undefined;
+            this.renderList(mentionChar, data, searchTerm);
+          },
+          mentionChar
+        );
+      } else {
+        if (this.existingSourceExecutionToken) {
+          this.existingSourceExecutionToken.abandoned = true;
         }
-        this.highlightSelectedItem(items);
+        this.hideMentionList();
+      }
+    } else {
+      if (this.existingSourceExecutionToken) {
+        this.existingSourceExecutionToken.abandoned = true;
+      }
+      this.hideMentionList();
     }
+  }
 
-    highlightSelectedItem(items: NodeListOf<Element>) {
-        items.forEach((item) => item.classList.remove('highlight'));
-        const selectedItem = items[this._selectedSuggestion];
-        if (selectedItem) {
-            selectedItem.classList.add('highlight');
-            selectedItem.scrollIntoView({ block: 'nearest', inline: 'start' });
-        }
+  getAllowedCharsRegex(denotationChar: string): RegExp {
+    if (this.options.allowedChars instanceof RegExp) {
+      return this.options.allowedChars!;
+    } else {
+      return this.options.allowedChars?.(denotationChar) ?? /^[a-zA-Z0-9_]*$/;
     }
+  }
 
-    closeSuggestionPopover() {
-        this.isOpen = false;
-        if (this.popover) {
-            this.popover.remove();
-            this.popover = undefined;
-            document.removeEventListener('click', this.handleOutsideClick.bind(this), true);
-        }
-        this._selectedSuggestion = -1;
-        this.getEditorContainer().removeEventListener('keydown', this.handleKeyDown.bind(this));
+  onTextChange(delta: Delta, oldContent: Delta, source: EmitterSource) {
+    if (source === 'user') {
+      setTimeout(this.onSomethingChange.bind(this), 50);
     }
+  }
+
+  onSelectionChange(range: Range | null) {
+    if (range !== null && range.length === 0) {
+      this.onSomethingChange();
+    } else {
+      this.hideMentionList();
+    }
+  }
+
+  openMenu(denotationChar: string) {
+    const selection = this.quill.getSelection(true);
+    this.quill.insertText(selection.index, denotationChar);
+    this.quill.blur();
+    this.quill.focus();
+  }
 }

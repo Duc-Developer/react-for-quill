@@ -8,7 +8,7 @@
 ![react-for-quill-logo](/assets/logo.png)
 
 
-A [Quill] component for [React].
+A [Quill] component for [React]. It's faster, friendly and supports many features. Data will be cleaned with [domify](https://www.npmjs.com/package/domify) ([xss-attach](https://owasp.org/www-community/attacks/xss) prevention)
 
 It is based on bun & quill v2
 
@@ -19,10 +19,13 @@ See [live demo] or [code pen]
 [live demo]: https://duc-developer.github.io/react-for-quill
 [code pen]: https://codepen.io/Duc-Developer/pen/LYovqVL
 
-- [Quick Start](#quick-start)
-  - [Prepare Assets](#prepare-assets)
-  - [Basic Usage](#basic-usage)
-- [Contributing](#contributing)
+- [](#)
+  - [Quick Start](#quick-start)
+    - [Prepare Assets](#prepare-assets)
+    - [Basic Usage](#basic-usage)
+  - [Advance Usage](#advance-usage)
+    - [Mention Module](#mention-module)
+  - [Contributing](#contributing)
 
 ## Quick Start
 
@@ -40,11 +43,11 @@ Root assets from [quill-theme](https://quilljs.com/docs/customization/themes#the
 Choose your theme what you want `snow` or `bubble`, embed style to root html.
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.snow.css" rel="stylesheet" />
 ```
 or
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@1.0.4/dist/quill.bubble.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-for-quill@latest/dist/quill.bubble.css" />
 ```
 
 ---
@@ -53,12 +56,15 @@ or
 
 Implement your code
 ```jsx
-import React, { useState } from 'react';
+import React, { useState, RFQValue, MentionBlot, Mention } from 'react';
 import ReactQuill from 'react-for-quill';
-import 'react-quill/dist/quill.snow.css';
+import 'react-for-quill/dist/quill.snow.css';
 
+ReactForQuill.Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
+const defaultValue = '<p>Hello World!<p>';
 function MyComponent() {
- const [value, setValue] = useState<RFQValue>('');
+  const [initialValue, setInitialValue] = useState<RFQValue>(defaultValue);
+  const [value, setValue] = useState<RFQValue>(initialValue);
   const onChange = (html: string, delta: Delta, oldContent: Delta, source: EmitterSource) => {
     setValue(html);
   };
@@ -67,8 +73,69 @@ function MyComponent() {
       <ReactForQuill
         style={{ width: 500, height: 500 }}
         theme='snow' // or bubble
-        value={value}
+        defaultValue={initialValue}
         onChange={onChange}
+        modules={{
+            mention: {
+              allowedChars: /^[A-Za-z\s]*$/,
+              denotationChars: ["@"],
+              source: function (searchTerm, renderList) {
+                if (searchTerm.length === 0) {
+                  renderList(mentionData, searchTerm);
+                } else {
+                  const matches = [];
+                  for (let i = 0; i < mentionData.length; i++) {
+                    const matched = mentionData[i].value.toLowerCase().indexOf(searchTerm.toLowerCase());
+                    if (matched > -1) {
+                      matches.push(mentionData[i]);
+                    }
+                  }
+                  renderList(matches, searchTerm);
+                }
+              }
+            }
+          }}
+      />
+    </>
+  );
+}
+```
+> Watch all properties of Mention Module 👉 [here](https://github.com/Duc-Developer/react-for-quill/blob/main/src/Modules/Mention.ts)
+
+## Advance Usage
+These are many customization modules, formats, toolbars, etc. that may be useful for you.
+
+### Mention Module
+Basic for use Mention Module. See [live demo](https://duc-developer.github.io/react-for-quill)
+```jsx
+import ReactForQuill, { MentionBlot, Mention, Quill } from 'react-for-quill';
+Quill.register({ "blots/mentionBlot": MentionBlot, "modules/mention": Mention });
+function MyApp() {
+  const mentionData = [{id: 1, value: 'A1'}, {id: 2, value: 'A2'}]
+  return (
+    <>
+      <ReactForQuill
+        ...
+         modules={{
+            mention: {
+              allowedChars: /^[A-Za-z\s]*$/,
+              denotationChars: ["@"],
+              source: function (searchTerm, renderList) {
+                if (searchTerm.length === 0) {
+                  renderList(mentionData, searchTerm);
+                } else {
+                  const matches = [];
+                  for (let i = 0; i < mentionData.length; i++) {
+                    const matched = mentionData[i].value.toLowerCase().indexOf(searchTerm.toLowerCase());
+                    if (matched > -1) {
+                      matches.push(mentionData[i]);
+                    }
+                  }
+                  renderList(matches, searchTerm);
+                }
+              }
+            }
+          }
       />
     </>
   );

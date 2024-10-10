@@ -1,3 +1,123 @@
 #root {
     font-size: 1rem;
 }
+
+.rand-btn {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.rand-btn:hover {
+    background-color: #e5e5e5;
+}
+
+.rand-btn:active {
+    scale: 0.95;
+    transition: scale 0.1s linear;
+}
+
+.editor {
+    width: 50vw;
+    height: calc(100vh - 60px);
+}
+
+pre.html {
+    padding: 10px;
+    border-radius: 5px;
+    overflow: auto;
+    display: block;
+    width: calc(50vw - 20px);
+    height: calc(100vh - 68px);
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background-color: #282a36;
+}
+
+code.html {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+    background-color: #282a36;
+    /* color: #ffffff; */
+}
+
+/* custom-highlight.css */
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #282a36;
+    /* Background color */
+    color: #f8f8f2 !important;
+    /* Default text color */
+}
+
+.hljs-comment,
+.hljs-quote {
+    color: #6272a4;
+    /* Comment and quote color */
+    font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+    color: #ff79c6 !important;
+    /* Keyword color */
+    font-weight: bold;
+}
+
+.hljs-literal,
+.hljs-number,
+.hljs-tag .hljs-attr {
+    color: #bd93f9 !important;
+    /* Number and literal color */
+}
+
+.hljs-string,
+.hljs-doctag,
+.hljs-regexp,
+.hljs-title,
+.hljs-section,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-attr,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-deletion {
+    color: #f1fa8c !important;
+}
+
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-addition {
+    color: #50fa7b !important;
+    /* Title and name color */
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}
+
+/* Make HTML tags bold */
+.hljs-tag {
+    font-weight: bold;
+    color: #ff79c6 !important;
+    /* Adjust the color if needed */
+}
