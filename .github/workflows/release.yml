@@ -17,6 +17,8 @@ jobs:
   publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      MODE: 'production'
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
