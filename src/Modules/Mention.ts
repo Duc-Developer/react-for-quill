@@ -183,7 +183,7 @@ export interface MentionOption {
   ) => void;
 }
 
-class Mention extends Module<MentionOption> {
+export class Mention extends Module<MentionOption> {
   static DEFAULTS: MentionOption = {
     denotationChars: ['@'],
     showPrefix: true,
@@ -898,4 +898,3 @@ class Mention extends Module<MentionOption> {
     this.quill.focus();
   }
 }
-export default Mention;
