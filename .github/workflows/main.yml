@@ -14,6 +14,8 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    env:
+      MODE: 'production'
     steps:
       # ...
       - uses: actions/checkout@v3
@@ -21,8 +23,8 @@ jobs:
         with:
             bun-version: 1.1.13
             token: ${{ secrets.GITHUB_TOKEN }} 
-
-      # run any `bun` or `bunx` command
+      - name: Check Environment Mode
+        run: echo "Environment Mode is $MODE"
       - run: bun install
       - run: bun bundle
       - run: bun run bundle:declaration
@@ -30,8 +32,6 @@ jobs:
         run: |
           cp node_modules/quill/dist/quill.snow.css ./dist/quill.snow.css
           cp node_modules/quill/dist/quill.bubble.css ./dist/quill.bubble.css
-        env:
-          MODE: 'production'
   clone_demo:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
